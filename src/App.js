@@ -32,7 +32,6 @@ function App() {
             <Route path="/lessons/:id" element={<LessonPage />} />
             <Route path="/test/:id" element={<TestPage />} />
             <Route path="/tests" element={<Tests />} />
-            <Route path="/test/:id" element={<TestPage />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/fun" element={<FunZone />} />
             <Route path="/fake-news" element = {<FakeNews/>} />
