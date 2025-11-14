@@ -1,6 +1,5 @@
-// src/pages/LessonPage.jsx (ОБНОВЛЕНО)
 import React from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import lessons from "../data/lessonsData";
 
@@ -10,11 +9,10 @@ export default function LessonPage() {
 
   if (!lesson) return <Navigate to="/lessons" replace />;
 
-  // Стили для кнопок, чтобы уменьшить дублирование
   const buttonStyle = (bgColor) => ({
-    flex: "1 1 auto", // Изменено с 45% для лучшего распределения 3 кнопок
+    flex: "1 1 auto",
     textAlign: "center",
-    padding: "12px 10px", // Добавили немного горизонтального padding
+    padding: "12px 10px",
     background: bgColor,
     color: "#fff",
     borderRadius: 10,
@@ -22,7 +20,7 @@ export default function LessonPage() {
     fontWeight: "bold",
     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
     transition: "all 0.2s",
-    minWidth: "150px" // Минимальная ширина для каждой кнопки
+    minWidth: "150px"
   });
 
   return (
@@ -49,14 +47,12 @@ export default function LessonPage() {
         {lesson.title}
       </motion.h1>
 
-      {/* ВИДЕОПЛЕЕР (iframe для YouTube embed) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        style={{ textAlign: "center", marginBottom: 30, position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden' }} // Стили для адаптивного iframe 16:9
+        style={{ textAlign: "center", marginBottom: 30, position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden' }}
       >
-        {/* Заменяем тег <video> на <iframe> для YouTube embed */}
         <iframe
           src={lesson.video}
           title={lesson.title}
@@ -86,7 +82,7 @@ export default function LessonPage() {
 
       {lesson.tips && lesson.tips.length > 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, staggerChildren: 0.1 }}>
-          <h3 style={{ color: "#fa8c16", marginBottom: 15 }}>💡 Полезные советы:</h3>
+          <h3 style={{ color: "#fa8c16", marginBottom: 15 }}>💡 Useful Tips:</h3>
           <ul style={{ paddingLeft: 20 }}>
             {lesson.tips.map((tip, idx) => (
               <motion.li
@@ -102,47 +98,34 @@ export default function LessonPage() {
         </motion.div>
       )}
 
-      {/* БЛОК НАВИГАЦИИ */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
         style={{ display: "flex", justifyContent: "space-between", gap: 15, flexWrap: "wrap", marginTop: 40 }}
       >
-        {/* КНОПКА: ПРЕДЫДУЩИЙ УРОК */}
         {lesson.prev && (
-          <motion.a
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href={`/lessons/${lesson.prev}`}
-            style={buttonStyle("#0086b3")}
-          >
-            ← Предыдущий урок
-          </motion.a>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to={`/lessons/${lesson.prev}`} style={buttonStyle("#0086b3")}>
+              ← Previous Lesson
+            </Link>
+          </motion.div>
         )}
 
-        {/* КНОПКА: ПРОЙТИ ТЕСТ */}
         {lesson.testPath && (
-          <motion.a
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href={lesson.testPath}
-            style={buttonStyle("#52c41a")}
-          >
-            Пройти тест
-          </motion.a>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to={lesson.testPath} style={buttonStyle("#52c41a")}>
+              Пройти тест
+            </Link>
+          </motion.div>
         )}
 
-        {/* КНОПКА: СЛЕДУЮЩИЙ УРОК */}
         {lesson.next && (
-          <motion.a
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            href={`/lessons/${lesson.next}`}
-            style={buttonStyle("#1890ff")}
-          >
-            Следующий урок →
-          </motion.a>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to={`/lessons/${lesson.next}`} style={buttonStyle("#1890ff")}>
+              Следующий урок →
+            </Link>
+          </motion.div>
         )}
       </motion.div>
     </motion.div>
