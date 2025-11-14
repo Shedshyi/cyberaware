@@ -1,0 +1,348 @@
+/* === Основные стили === */
+body {
+  background-color: #f5f7fa;
+  font-family: 'Segoe UI', sans-serif;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+/* === Хедер === */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #001529;
+  padding: 0 2rem;
+  height: 60px;
+}
+
+.logo {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.nav-links a {
+  color: white;
+  margin-left: 1.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #00ff99;
+}
+
+/* === Контейнер приложения === */
+.App {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+/* === Блок тестов === */
+.test-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.question-block {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.option {
+  display: block;
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+.submit-btn,
+.restart-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #00ff99;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.submit-btn:hover,
+.restart-btn:hover {
+  background: #00cc77;
+}
+
+.result-block {
+  text-align: left;
+}
+
+.analytics {
+  background: #f2f2f2;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 10px;
+}
+
+/* === Дополнительно: адаптивность === */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .nav-links {
+    margin-top: 0.5rem;
+  }
+
+  .App {
+    padding: 30px 10px;
+  }
+
+  .test-container {
+    padding: 20px;
+  }
+}
+.password-input {
+  padding: 10px;
+  width: 80%;
+  max-width: 400px;
+  font-size: 1rem;
+  margin: 15px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.strength-bar {
+  height: 10px;
+  border-radius: 5px;
+  margin: 10px auto;
+  width: 80%;
+  transition: 0.4s;
+}
+
+.advice {
+  background: #f6f6f6;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  color: #333;
+}
+
+.lessons-section {
+  text-align: center;
+  padding: 40px 0;
+  background: #f5f7fa;
+}
+
+.lessons-title {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #001529;
+}
+
+.carousel-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 20px;
+  padding: 10px;
+  width: 90%;
+}
+
+.lesson-slide {
+  flex: 0 0 300px;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.lesson-slide:hover {
+  transform: translateY(-5px);
+}
+
+.scroll-btn {
+  background-color: #001529;
+  color: white;
+  border: none;
+  font-size: 1.8rem;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: 0.3s;
+}
+
+.scroll-btn:hover {
+  background-color: #1890ff;
+}
+
+.scroll-btn.left {
+  position: absolute;
+  left: 0;
+}
+
+.scroll-btn.right {
+  position: absolute;
+  right: 0;
+}
+
+/* === FunZone styles === */
+
+.fan-zone {
+  max-width: 800px;
+  margin: 2rem auto;
+  background: #f9fafc;
+  border-radius: 16px;
+}
+
+.fan-zone h1 {
+  color: #001529;
+  text-align: center;
+}
+
+.fan-zone ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.fan-zone li {
+  background: #ffffff;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fan-zone li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+}
+
+.fan-zone button {
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.fan-zone button:hover {
+  transform: scale(1.03);
+}
+
+.fan-zone .shadow-md {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Контейнеры блоков */
+.fan-zone .bg-white {
+  background-color: #fff;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* Текст */
+.fan-zone p,
+.fan-zone li {
+  color: #333;
+  line-height: 1.5;
+}
+
+.fan-zone h2 {
+  color: #001529;
+  margin-bottom: 0.5rem;
+}
+
+.fan-zone .text-blue-600:hover {
+  color: #0050b3;
+}
+/* === Lessons === */
+
+.lessons-container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #f9fafc;
+  border-radius: 16px;
+}
+
+.page-title {
+  color: #001529;
+  font-size: 1.8rem;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  text-align: center;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.lesson-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.2rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.lesson-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.lesson-card h2 {
+  color: #001529;
+  font-size: 1.1rem;
+}
+
+.lesson-card p {
+  color: #444;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.lesson-link {
+  display: inline-block;
+  margin-top: 0.8rem;
+  color: #1677ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.lesson-link:hover {
+  text-decoration: underline;
+}
+
+.video-container {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
