@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/cyberaware/static/css/main.95851408.css",
+    "main.js": "/cyberaware/static/js/main.0cd0abd9.js",
+    "index.html": "/cyberaware/index.html",
+    "main.95851408.css.map": "/cyberaware/static/css/main.95851408.css.map",
+    "main.0cd0abd9.js.map": "/cyberaware/static/js/main.0cd0abd9.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.95851408.css",
+    "static/js/main.0cd0abd9.js"
+  ]
+}
