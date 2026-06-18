@@ -1,51 +1,32 @@
-// src/components/LessonTemplate.jsx
 import React from "react";
-import { Card, Button, Typography } from "antd";
-import { useNavigate } from "react-router-dom";
-import "../styles.css";
-
-const { Title, Paragraph } = Typography;
+import { Link } from "react-router-dom";
 
 export default function LessonTemplate({ title, videoUrl, description, tips = [], testLink, nextId }) {
-  const navigate = useNavigate();
-
   return (
     <div className="lesson-page">
-      <Card className="lesson-card">
-        <Title level={2} className="lesson-title">{title}</Title>
+      <div className="lesson-card">
+        <h2 className="lesson-title">{title}</h2>
 
         <div className="lesson-video">
-          <iframe
-            src={videoUrl}
-            title={title}
-            allowFullScreen
-          ></iframe>
+          <iframe src={videoUrl} title={title} allowFullScreen />
         </div>
 
-        <Paragraph className="lesson-description">{description}</Paragraph>
+        <p className="lesson-description">{description}</p>
 
         {tips.length > 0 && (
           <div className="lesson-tips">
             <h3>💡 Советы:</h3>
             <ul>
-              {tips.map((tip, index) => <li key={index}>{tip}</li>)}
+              {tips.map((tip, i) => <li key={i}>{tip}</li>)}
             </ul>
           </div>
         )}
 
         <div className="lesson-buttons">
-          {testLink && (
-            <Button type="primary" onClick={() => navigate(testLink)}>
-              Пройти тест
-            </Button>
-          )}
-          {nextId && (
-            <Button onClick={() => navigate(`/lessons/${nextId}`)}>
-              Следующий урок →
-            </Button>
-          )}
+          {testLink && <Link to={testLink} className="t-btn t-btn-primary">Пройти тест</Link>}
+          {nextId && <Link to={`/lessons/${nextId}`} className="t-btn t-btn-outline">Следующий урок →</Link>}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -1,96 +1,169 @@
-// src/components/HeaderBar.jsx
-import React, { useState } from "react";
-import { Menu, Drawer, Button } from "antd";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
-import { MenuOutlined } from "@ant-design/icons";
+import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "../i18n/LanguageContext";
 
-const HeaderBar = () => {
+function loadProfile() {
+  try { return JSON.parse(localStorage.getItem("userProfile")); }
+  catch { return null; }
+}
+function loadResults() {
+  try { return JSON.parse(localStorage.getItem("testResults")) || {}; }
+  catch { return {}; }
+}
+
+export default function Header() {
   const location = useLocation();
-  const [visible, setVisible] = useState(false);
+  const { t, lang, setLang } = useLanguage();
+  const [profile, setProfile] = useState(() => loadProfile());
+  const [done,    setDone]    = useState(() => Object.keys(loadResults()).length);
+  const [open,    setOpen]    = useState(false);
+  const [theme,   setTheme]   = useState(() => localStorage.getItem("theme") || "light");
 
-  const menuItems = [
-    { label: <Link to="/lessons">Уроки</Link>, key: "/lessons" },
-    { label: <Link to="/tests">Тесты</Link>, key: "/tests" },
-    { label: <Link to="/analytics">Аналитика</Link>, key: "/analytics" },
-    { label: <Link to="/fun">Тренажёры</Link>, key: "/fun" },
+  const NAV = [
+    { to: "/lessons",   label: t("nav.lessons")  },
+    { to: "/tests",     label: t("nav.tests")    },
+    { to: "/fun",       label: t("nav.trainers") },
+    { to: "/analytics", label: t("nav.analytics")},
   ];
 
-  const showDrawer = () => setVisible(true);
-  const closeDrawer = () => setVisible(false);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const sync = () => {
+      setProfile(loadProfile());
+      setDone(Object.keys(loadResults()).length);
+    };
+    window.addEventListener("focus",   sync);
+    window.addEventListener("storage", sync);
+    const iv = setInterval(sync, 1500);
+    return () => {
+      window.removeEventListener("focus",   sync);
+      window.removeEventListener("storage", sync);
+      clearInterval(iv);
+    };
+  }, []);
+
+  useEffect(() => setOpen(false), [location.pathname]);
 
   return (
-    <motion.div
-      initial={{ y: -50, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      style={{
-        position: "fixed",
-        top: 0,
-        width: "100%",
-        zIndex: 1000,
-        background: "#f0f2f5",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "0 20px",
-      }}
-    >
-      {/* Лого */}
-      <div className="logo" style={{ fontSize: 24, fontWeight: "bold" }}>
-        <motion.div whileHover={{ scale: 1.1, rotate: 5 }} style={{ display: "inline-block" }}>
-          <Link to="/" style={{ color: "#001529", textDecoration: "none" }}>
-            CyberAware 🔐
-          </Link>
-        </motion.div>
-      </div>
-
-      {/* Desktop Menu */}
-      <div className="desktop-menu" style={{ display: "none", flex: 1, justifyContent: "flex-end" }}>
-        <Menu
-          mode="horizontal"
-          selectedKeys={[location.pathname]}
-          theme="light"
-          style={{ background: "transparent", flex: 1, justifyContent: "flex-end" }}
-          items={menuItems}
-        />
-      </div>
-
-      {/* Mobile Hamburger */}
-      <div className="mobile-menu" style={{ display: "flex", alignItems: "center" }}>
-        <Button
-          type="text"
-          icon={<MenuOutlined style={{ fontSize: 24 }} />}
-          onClick={showDrawer}
-        />
-      </div>
-
-      {/* Drawer for mobile */}
-      <Drawer
-        title="CyberAware 🔐"
-        placement="right"
-        onClose={closeDrawer}
-        visible={visible}
-        bodyStyle={{ padding: 0 }}
+    <>
+      <motion.header
+        className="hdr-root"
+        initial={{ y: -60, opacity: 0 }}
+        animate={{ y: 0,   opacity: 1 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       >
-        <Menu
-          mode="vertical"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          onClick={closeDrawer} // закрываем drawer при выборе пункта
-        />
-      </Drawer>
+        <div className="hdr-inner">
 
-      {/* Стилизация для адаптива через media queries */}
-      <style>{`
-        @media(min-width: 768px) {
-          .desktop-menu { display: flex !important; }
-          .mobile-menu { display: none !important; }
-        }
-      `}</style>
-    </motion.div>
+          <Link to="/" className="hdr-logo">
+            <span className="hdr-logo-icon">🔐</span>
+            <span className="hdr-logo-text">CyberAware</span>
+          </Link>
+
+          <nav className="hdr-nav">
+            {NAV.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`hdr-link${location.pathname === to ? " hdr-link-active" : ""}`}
+              >
+                {label}
+              </Link>
+            ))}
+            {done > 0 && (
+              <Link to="/analytics" className="hdr-progress-pill">
+                {t("nav.progress", { done })}
+              </Link>
+            )}
+          </nav>
+
+          <div className="hdr-right">
+            {/* Language toggle */}
+            <button
+              className="hdr-lang"
+              onClick={() => setLang(lang === "ru" ? "en" : "ru")}
+              title={lang === "ru" ? "Switch to English" : "Переключить на русский"}
+            >
+              {lang === "ru" ? "EN" : "RU"}
+            </button>
+
+            {/* Theme toggle */}
+            <button
+              className="hdr-theme"
+              onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
+              title={theme === "dark" ? t("theme.toLight") : t("theme.toDark")}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+
+            <Link
+              to="/profile"
+              className={`hdr-avatar${location.pathname === "/profile" ? " hdr-avatar-active" : ""}`}
+              title={profile ? profile.name : t("nav.profile")}
+            >
+              {profile
+                ? <span style={{ background: profile.color }}>{profile.name[0].toUpperCase()}</span>
+                : <span className="hdr-avatar-empty">👤</span>
+              }
+            </Link>
+            <button
+              className={`hdr-burger${open ? " hdr-burger-open" : ""}`}
+              onClick={() => setOpen(o => !o)}
+              aria-label="Меню"
+            >
+              <span /><span /><span />
+            </button>
+          </div>
+
+        </div>
+      </motion.header>
+
+      <AnimatePresence>
+        {open && (
+          <motion.nav
+            className="hdr-mobile"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{   opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+          >
+            {NAV.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`hdr-mobile-link${location.pathname === to ? " hdr-mobile-active" : ""}`}
+                onClick={() => setOpen(false)}
+              >
+                {label}
+              </Link>
+            ))}
+            <Link
+              to="/profile"
+              className={`hdr-mobile-link${location.pathname === "/profile" ? " hdr-mobile-active" : ""}`}
+              onClick={() => setOpen(false)}
+            >
+              {profile ? t("nav.mobileProfile", { name: profile.name }) : t("nav.profile")}
+            </Link>
+            {done > 0 && (
+              <div className="hdr-mobile-progress">
+                <span>{t("nav.mobileCourse")}</span>
+                <strong>{t("nav.mobileTests", { done })}</strong>
+              </div>
+            )}
+            <button
+              className="hdr-mobile-link"
+              style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}
+              onClick={() => { setLang(lang === "ru" ? "en" : "ru"); setOpen(false); }}
+            >
+              🌐 {lang === "ru" ? "Switch to English" : "Переключить на русский"}
+            </button>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </>
   );
-};
-
-export default HeaderBar;
+}
