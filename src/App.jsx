@@ -1,6 +1,7 @@
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./i18n/LanguageContext";
+import { AuthProvider } from "./auth/AuthContext";
 import HeaderBar from "./components/Header";
 import FooterBar from "./components/Footer";
 import Home from "./pages/Home";
@@ -19,12 +20,14 @@ import SocialEngineeringPage from "./pages/SocialEngineeringPage";
 import URLScannerPage from "./pages/URLScannerPage";
 import ProfilePage from "./pages/ProfilePage";
 import CertificatePage from "./pages/CertificatePage";
+import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 import './styles.css';
 
 function App() {
   return (
     <LanguageProvider>
+    <AuthProvider>
     <Router>
       <div className="app-layout">
         <HeaderBar />
@@ -46,12 +49,14 @@ function App() {
             <Route path="/url-scanner" element={<URLScannerPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/certificate" element={<CertificatePage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <FooterBar />
       </div>
     </Router>
+    </AuthProvider>
     </LanguageProvider>
   );
 }

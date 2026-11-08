@@ -4474,3 +4474,26 @@ html[data-theme="dark"] .fz-card-title { color: #f1f5f9; }
 html[data-theme="dark"] .fz-card-desc { color: #94a3b8; }
 html[data-theme="dark"] .fz-card-time { color: #64748b; }
 
+
+/* ── Account sync card (profile page) ───────────────────────── */
+.profile-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #374151;
+}
+.profile-account b { word-break: break-all; }
+.profile-account .t-btn { text-decoration: none; }
+html[data-theme="dark"] .profile-account {
+  background: #1a1d27;
+  border-color: #2a2f3d;
+  color: #cbd5e1;
+}

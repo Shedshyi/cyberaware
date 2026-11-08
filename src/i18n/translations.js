@@ -37,7 +37,7 @@ export const ru = {
       ],
     },
     cookie: {
-      text: "Мы используем localStorage для сохранения прогресса и результатов тестов. Никаких данных на сервер.",
+      text: "Мы сохраняем прогресс и результаты тестов в браузере. Если ты войдёшь в аккаунт, они также сохраняются на сервере и используются в исследовании.",
       accept: "Понятно", decline: "Не сейчас",
       toastAccept: "Готово. Хороший повод читать баннеры перед кликом.",
       toastDecline: "Окей, продолжаем без лишнего шума.",
@@ -208,7 +208,7 @@ export const en = {
       ],
     },
     cookie: {
-      text: "We use localStorage to save your progress and test results. No data is sent to a server.",
+      text: "We save your progress and test results in your browser. If you sign in, they are also stored on our server and used for research.",
       accept: "Got it", decline: "Not now",
       toastAccept: "Done. Good habit — always read banners before clicking.",
       toastDecline: "OK, continuing without the noise.",

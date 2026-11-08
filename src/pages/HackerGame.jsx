@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { logEvent } from "../lib/store";
 
 // ── Threat data (RU) ─────────────────────────────────────────────────────────
 const THREATS_RU = [
@@ -460,6 +461,14 @@ export default function HackerGame() {
         const finalPts = points + gained;
         saveHiScore(finalPts);
         setHiScore(loadHiScore());
+        logEvent("game_finish", {
+          game: "hacker_game",
+          points: finalPts,
+          correct: correct + (isCorrect ? 1 : 0),
+          rounds: nextIdx,
+          livesLeft: Math.max(0, newLives),
+          lang,
+        });
         setPhase("finished");
       } else {
         setIdx(nextIdx);
@@ -468,7 +477,7 @@ export default function HackerGame() {
         setPhase("play");
       }
     }, delay);
-  }, [phase, current, combo, lives, idx, points, timeLeft]);
+  }, [phase, current, combo, lives, idx, points, timeLeft, correct, lang]);
 
   const restart = () => {
     setThreats(pickThreats(lang === "en" ? THREATS_EN : THREATS_RU, GAME_SIZE));

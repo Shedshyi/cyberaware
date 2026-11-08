@@ -6,6 +6,7 @@ import testsDataEN from "../data/testsData.en";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
+import { saveTestResult } from "../lib/store";
 
 const TIMER_SEC = 180;
 
@@ -29,6 +30,23 @@ export default function TestPage() {
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
+  const startedAt = useRef(Date.now());
+
+  const persist = (a, s, timedOut) => {
+    saveTestResult({
+      testId: id,
+      score: s,
+      total: questions.length,
+      answers: questions.map(q => ({
+        questionId: q.id,
+        selected: a[q.id] ?? null,
+        isCorrect: a[q.id] === q.correct,
+      })),
+      durationSec: Math.round((Date.now() - startedAt.current) / 1000),
+      timedOut,
+      lang,
+    });
+  };
 
   useEffect(() => {
     if (submitted) return;
@@ -44,11 +62,9 @@ export default function TestPage() {
       setScore(s);
       setSubmitted(true);
       setTimedOut(true);
-      const prev = JSON.parse(localStorage.getItem("testResults")) || {};
-      prev[id] = { score: s, total: questions.length, date: new Date().toISOString() };
-      localStorage.setItem("testResults", JSON.stringify(prev));
+      persist(a, s, true);
     }
-  }, [timeLeft, submitted, id, questions]);
+  }, [timeLeft, submitted, id, questions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const lessonIdx  = lessons.findIndex(l => l.testPath === `/test/${id}`);
   const thisLesson = lessonIdx >= 0 ? lessons[lessonIdx] : null;
@@ -78,9 +94,7 @@ export default function TestPage() {
     questions.forEach(q => { if (answers[q.id] === q.correct) s++; });
     setScore(s);
     setSubmitted(true);
-    const prev = JSON.parse(localStorage.getItem("testResults")) || {};
-    prev[id] = { score: s, total: questions.length, date: new Date().toISOString() };
-    localStorage.setItem("testResults", JSON.stringify(prev));
+    persist(answers, s, false);
   };
 
   const handleRetry = () => {
@@ -91,6 +105,7 @@ export default function TestPage() {
     setScore(0);
     setTimeLeft(TIMER_SEC);
     setTimedOut(false);
+    startedAt.current = Date.now();
   };
 
   const mins = Math.floor(timeLeft / 60);

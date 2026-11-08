@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getLessonRead, markLessonOpened } from "../lib/store";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 28 },
@@ -12,9 +13,7 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] },
 });
 
-function loadRead() {
-  try { return JSON.parse(localStorage.getItem("lessonRead") || "{}"); } catch { return {}; }
-}
+const loadRead = getLessonRead;
 
 export default function LessonPage() {
   const { id } = useParams();
@@ -25,12 +24,8 @@ export default function LessonPage() {
   const [alreadyRead] = useState(() => !!loadRead()[id]);
 
   useEffect(() => {
-    const prev = loadRead();
-    if (!prev[id]) {
-      prev[id] = new Date().toISOString();
-      localStorage.setItem("lessonRead", JSON.stringify(prev));
-    }
-  }, [id]);
+    if (lessons.some(l => l.id === id)) markLessonOpened(id);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!lesson) return <Navigate to="/lessons" replace />;
 

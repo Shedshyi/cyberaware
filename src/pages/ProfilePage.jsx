@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useAuth } from "../auth/AuthContext";
+import { getProfile, getTestResults, saveProfile } from "../lib/store";
 
 const AVATAR_COLORS = [
   { id: "indigo", value: "#6366f1" },
@@ -29,9 +31,29 @@ function getBadges(lang) {
   ];
 }
 
-function loadProfile()  { try { return JSON.parse(localStorage.getItem("userProfile")); } catch { return null; } }
-function saveProfile(p) { localStorage.setItem("userProfile", JSON.stringify(p)); }
-function loadResults()  { try { return JSON.parse(localStorage.getItem("testResults")) || {}; } catch { return {}; } }
+const loadProfile = getProfile;
+const loadResults = getTestResults;
+
+function AccountCard({ lang }) {
+  const { enabled, user, signOut } = useAuth();
+  if (!enabled) return null;
+  const en = lang === "en";
+  return (
+    <div className="profile-account">
+      {user ? (
+        <>
+          <span>☁️ {en ? "Synced with account" : "Синхронизировано с аккаунтом"} <b>{user.email}</b></span>
+          <button className="t-btn t-btn-outline" onClick={signOut}>{en ? "Sign out" : "Выйти"}</button>
+        </>
+      ) : (
+        <>
+          <span>💾 {en ? "Progress is stored in this browser only." : "Прогресс хранится только в этом браузере."}</span>
+          <Link to="/login" className="t-btn t-btn-primary">{en ? "Sign in" : "Войти"}</Link>
+        </>
+      )}
+    </div>
+  );
+}
 
 function getScoreColor(pct) {
   if (pct >= 80) return "#10b981";
@@ -47,6 +69,7 @@ function formatDate(dateStr, lang) {
 }
 
 function SetupModal({ onSave, lang }) {
+  const { enabled, user } = useAuth();
   const [name,  setName]  = useState("");
   const [color, setColor] = useState(AVATAR_COLORS[0].value);
 
@@ -107,6 +130,12 @@ function SetupModal({ onSave, lang }) {
         <button className="t-btn t-btn-primary t-btn-lg t-btn-block" onClick={handleSave} disabled={!name.trim()}>
           {lang === "en" ? "Create profile" : "Создать профиль"}
         </button>
+        {enabled && !user && (
+          <p style={{ marginTop: 16, marginBottom: 0, textAlign: "center", fontSize: 14 }}>
+            {lang === "en" ? "Already have an account? " : "Уже есть аккаунт? "}
+            <Link to="/login">{lang === "en" ? "Sign in" : "Войти"}</Link>
+          </p>
+        )}
       </motion.div>
     </div>
   );
@@ -162,6 +191,7 @@ function EditModal({ profile, onSave, onClose, lang }) {
 
 export default function ProfilePage() {
   const { lang } = useLanguage();
+  const { user, loading } = useAuth();
   const lessons = lang === "en" ? lessonsEN : lessonsRU;
   const BADGES = getBadges(lang);
 
@@ -178,6 +208,13 @@ export default function ProfilePage() {
     window.addEventListener("focus", refresh);
     return () => window.removeEventListener("focus", refresh);
   }, []);
+
+  // После входа/выхода кэш перезаписывается — перечитываем
+  useEffect(() => {
+    if (loading) return;
+    setProfile(loadProfile());
+    setResults(loadResults());
+  }, [user, loading]);
 
   const passed      = Object.keys(results).length;
   const allScores   = Object.values(results);
@@ -244,6 +281,8 @@ export default function ProfilePage() {
             ))}
           </div>
         </motion.div>
+
+        <AccountCard lang={lang} />
 
         {allPassed && (
           <motion.div className="profile-cert-banner" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.5 }}>
