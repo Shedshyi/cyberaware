@@ -5,7 +5,7 @@ const FooterBar = () => {
   const { t } = useLanguage();
   return (
     <footer className="app-footer">
-      <p style={{ margin: 5, fontSize: "1.1rem" }}>{t("footer.copy")}</p>
+      <p style={{ margin: 5, fontSize: "1.1rem" }}>{t("footer.copy", { year: new Date().getFullYear() })}</p>
       <p style={{ margin: 5, fontSize: "0.9rem" }}>
         🌐 {t("footer.follow")}
         <span style={{ margin: "0 10px" }}>🐦 Twitter</span>

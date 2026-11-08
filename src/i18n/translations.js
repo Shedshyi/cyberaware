@@ -9,7 +9,7 @@ export const ru = {
   theme: { toDark: "Тёмная тема", toLight: "Светлая тема" },
 
   home: {
-    chip: "Курс по киберграмотности · 2025",
+    chip: "Курс по киберграмотности",
     title: "Cyber<gradient>Aware</gradient>",
     subtitle: "Учись распознавать цифровые угрозы — через короткие уроки, тесты с разбором ошибок и интерактивные тренажёры.",
     cta1: "Начать обучение →", cta2: "Открыть тренажёры",
@@ -59,7 +59,7 @@ export const ru = {
     concepts: "Ключевые концепции",
     facts: "Ключевые факты",
     doTitle: "Что делать", dontTitle: "Чего избегать",
-    caseTitle: "Реальный кейс",
+    caseTitle: "Разбор случая",
     caseLesson: "Вывод:",
     tips: "Советы",
     takeTest: "Пройти тест →",
@@ -157,7 +157,7 @@ export const ru = {
   },
 
   footer: {
-    copy: "© 2025 CyberAware Project by Nurgalym Jambul",
+    copy: "© {year} CyberAware Project by Nurgalym Jambul",
     follow: "Следите за нами:",
     tagline: "Разрабатываем для безопасного и умного цифрового мира!",
   },
@@ -180,7 +180,7 @@ export const en = {
   theme: { toDark: "Dark theme", toLight: "Light theme" },
 
   home: {
-    chip: "Cyber Literacy Course · 2025",
+    chip: "Cyber Literacy Course",
     title: "Cyber<gradient>Aware</gradient>",
     subtitle: "Learn to recognize digital threats through concise lessons, quizzes with explanations, and interactive trainers.",
     cta1: "Start Learning →", cta2: "Open Trainers",
@@ -230,7 +230,7 @@ export const en = {
     concepts: "Key Concepts",
     facts: "Key Facts",
     doTitle: "Do", dontTitle: "Avoid",
-    caseTitle: "Real-World Case",
+    caseTitle: "Case Study",
     caseLesson: "Takeaway:",
     tips: "Tips",
     takeTest: "Take the Test →",
@@ -328,7 +328,7 @@ export const en = {
   },
 
   footer: {
-    copy: "© 2025 CyberAware Project by Nurgalym Jambul",
+    copy: "© {year} CyberAware Project by Nurgalym Jambul",
     follow: "Follow us:",
     tagline: "Building a safer, smarter digital world!",
   },

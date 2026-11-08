@@ -87,7 +87,16 @@ export default function LessonPage() {
                   whileHover={{ y: -3 }}
                 >
                   <span className="lp-fact-num">{String(i + 1).padStart(2, "0")}</span>
-                  <p className="lp-fact-text">{fact}</p>
+                  <div className="lp-fact-body">
+                    <p className="lp-fact-text">{typeof fact === "string" ? fact : fact.text}</p>
+                    {fact.source && (
+                      <p className="lp-fact-source">
+                        {fact.url
+                          ? <a href={fact.url} target="_blank" rel="noopener noreferrer">{fact.source} ↗</a>
+                          : fact.source}
+                      </p>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -129,13 +138,27 @@ export default function LessonPage() {
               className="lp-case-card"
               whileHover={{ y: -3 }}
             >
-              <div className="lp-case-badge">{lang === "en" ? "Real incident" : "Реальный инцидент"}</div>
+              {lesson.cases.kind === "illustrative" ? (
+                <div className="lp-case-badge lp-case-badge-example">{lang === "en" ? "Composite example" : "Собирательный пример"}</div>
+              ) : (
+                <div className="lp-case-badge">{lang === "en" ? "Real incident" : "Реальный инцидент"}</div>
+              )}
               <h3 className="lp-case-title">{lesson.cases.title}</h3>
               <p className="lp-case-story">{lesson.cases.story}</p>
               <div className="lp-case-lesson">
                 <span className="lp-case-lesson-icon">💡</span>
                 <p>{lesson.cases.lesson}</p>
               </div>
+              {lesson.cases.kind === "illustrative" ? (
+                <p className="lp-case-source">{lang === "en"
+                  ? "Names and details are invented; the scheme itself is typical of real cases."
+                  : "Имена и детали вымышлены, сама схема типична для реальных случаев."}</p>
+              ) : lesson.cases.source && (
+                <p className="lp-case-source">
+                  {lang === "en" ? "Source: " : "Источник: "}
+                  <a href={lesson.cases.source.url} target="_blank" rel="noopener noreferrer">{lesson.cases.source.label} ↗</a>
+                </p>
+              )}
             </motion.div>
           </motion.section>
         )}

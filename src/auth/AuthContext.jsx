@@ -3,7 +3,7 @@ import { supabase, backendEnabled } from "../lib/supabase";
 import { setCurrentUser, hydrateFromServer, clearPersonalData } from "../lib/store";
 
 const AuthContext = createContext({
-  enabled: false, loading: false, user: null, profile: null,
+  enabled: false, loading: false, user: null, profile: null, research: { pre: null, post: null },
   sendLoginEmail: async () => {}, verifyCode: async () => {}, signOut: async () => {},
   refreshProfile: async () => {},
 });
@@ -11,14 +11,21 @@ const AuthContext = createContext({
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
   const [profile, setProfile] = useState(null);
+  const [research, setResearch] = useState({ pre: null, post: null });
   const [loading, setLoading] = useState(backendEnabled);
 
   const applySession = useCallback(async (session) => {
     const u = session?.user ?? null;
     setUser(u);
     setCurrentUser(u?.id ?? null);
-    if (u) setProfile(await hydrateFromServer(u.id));
-    else setProfile(null);
+    if (u) {
+      const h = await hydrateFromServer(u.id);
+      setProfile(h?.profile ?? null);
+      setResearch(h?.research ?? { pre: null, post: null });
+    } else {
+      setProfile(null);
+      setResearch({ pre: null, post: null });
+    }
     setLoading(false);
   }, []);
 
@@ -28,7 +35,9 @@ export function AuthProvider({ children }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       // INITIAL_SESSION уже обработан через getSession; TOKEN_REFRESHED не меняет пользователя
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") applySession(session);
+      // Запросы к базе внутри этого колбэка могут заблокировать auth-лок supabase-js,
+      // поэтому обработка откладывается до следующего тика.
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") setTimeout(() => applySession(session), 0);
     });
 
     // После перехода по ссылке из письма в адресе остаётся ?code=... — убираем
@@ -54,6 +63,22 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   }, []);
 
+  const signInWithPassword = useCallback(async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, []);
+
+  /** Регистрация по паролю. Возвращает true, если сразу вошли (подтверждение почты выключено). */
+  const signUpWithPassword = useCallback(async (email, password) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: window.location.origin + import.meta.env.BASE_URL },
+    });
+    if (error) throw error;
+    return !!data.session;
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     clearPersonalData();
@@ -65,10 +90,16 @@ export function AuthProvider({ children }) {
     setProfile(data);
   }, [user]);
 
+  /** Отметить сданный входной/итоговый тест без повторной загрузки с сервера. */
+  const markAssessmentDone = useCallback((phase, result) => {
+    setResearch(r => ({ ...r, [phase]: result }));
+  }, []);
+
   return (
     <AuthContext.Provider value={{
-      enabled: backendEnabled, loading, user, profile,
-      sendLoginEmail, verifyCode, signOut, refreshProfile,
+      enabled: backendEnabled, loading, user, profile, research,
+      sendLoginEmail, verifyCode, signInWithPassword, signUpWithPassword,
+      signOut, refreshProfile, markAssessmentDone,
     }}>
       {children}
     </AuthContext.Provider>

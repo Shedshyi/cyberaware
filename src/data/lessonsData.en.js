@@ -11,10 +11,10 @@ const lessonsEN = [
       { term: "Digital Hygiene", def: "A set of habits and practices that maintain safety and order in your digital life.", example: "Example: regularly changing passwords, updating apps, and reviewing privacy settings." },
     ],
     keyFacts: [
-      "95% of cyberattacks begin with human error — IBM Security Report 2023",
-      "Approximately 4,000 cyberattacks occur every second worldwide",
-      "The average user has more than 100 online accounts",
-      "1 in 3 users has experienced data theft or an account breach",
+      { text: "About 60% of data breaches involve the human element: errors, social engineering, and stolen passwords.", source: "Verizon DBIR, 2025", url: "https://www.verizon.com/business/resources/reports/dbir/" },
+      { text: "In 2024 the FBI received 859,532 internet crime complaints, with reported losses reaching a record $16.6 billion.", source: "FBI IC3 Internet Crime Report, 2024", url: "https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf" },
+      { text: "The average user has about 168 passwords for personal accounts alone — impossible to remember them all.", source: "NordPass, 2024", url: "https://nordpass.com/blog/how-many-passwords-does-average-person-have/" },
+      { text: "Since July 2024, the National Bank of Kazakhstan's Anti-Fraud Center has logged over 90,000 fraud cases.", source: "Astana Times, 2026", url: "https://astanatimes.com/2026/02/kazakhstans-anti-fraud-center-logs-over-90000-fraud-cases-since-launch/" },
     ],
     doAndDont: {
       do: [
@@ -31,9 +31,11 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "How a '5G and COVID' hoax burned towers across the world",
-      story: "In 2020, a theory linking 5G towers to COVID-19 spread rapidly on Facebook and YouTube. Thousands of people shared 'studies' by fictional scientists without checking the source. Result: over 90 telecom towers were burned in the UK and telecom workers faced physical attacks. Companies spent tens of millions of pounds on infrastructure recovery.",
-      lesson: "Cyber literacy starts with a pause: verify before you share. One repost of unchecked information can contribute to a wave that causes real physical harm.",
+      kind: "real",
+      title: "How a '5G and COVID' hoax led to arson attacks on phone masts",
+      story: "In spring 2020, a theory that 5G masts spread COVID-19 went viral on Facebook and YouTube. People shared 'studies' without checking the source. Arson attacks followed in the UK: by late May the industry body Mobile UK had counted 87 arson incidents, and over the whole of 2020 the regulator Ofcom recorded 159 masts attacked. Telecom workers reported hundreds of incidents of abuse and threats.",
+      lesson: "Cyber literacy starts with a pause: verify before you share. One repost of unchecked information can become part of a wave that causes real physical harm.",
+      source: { label: "Mobile World Live / Ofcom Connected Nations, 2020", url: "https://www.mobileworldlive.com/regulation/mast-attacks-cost-uk-operators-170000-hours/" },
     },
     video: "https://www.youtube.com/embed/UAjYxp6Kxu8",
     tips: ["Cyber literacy is about critical thinking, not just technical know-how.", "Always verify sources before trusting or sharing online content."],
@@ -51,10 +53,10 @@ const lessonsEN = [
       { term: "Passphrase", def: "A long phrase made of random words that is easy to remember but hard to crack due to its length.", example: "Example: 'Elephant-Moon-Coffee-2024!' — 20+ characters, easy to recall, practically impossible to brute-force." },
     ],
     keyFacts: [
-      "'123456' has been the world's most-used password for 10 years running",
-      "Adding one extra character multiplies brute-force time by 60+",
-      "81% of data breaches involve weak or stolen passwords — Verizon DBIR",
-      "Password manager users are 3× less likely to be breached",
+      { text: "'123456' is the world's most common password, and 78% of the most common passwords can be cracked in under a second.", source: "NordPass, 2024", url: "https://nordpass.com/most-common-passwords-list/" },
+      { text: "Each extra character multiplies the number of possible passwords by 26 (lowercase only) or by 95 (all printable characters).", source: "Calculation: password alphabet size" },
+      { text: "An SMS code blocked 100% of automated bot attacks, 96% of bulk phishing and 76% of targeted attacks on Google accounts.", source: "Google Security Blog, 2019", url: "https://security.googleblog.com/2019/05/new-research-how-effective-is-basic.html" },
+      { text: "Stolen credentials are the most common way in: 22% of breaches start with credential abuse.", source: "Verizon DBIR, 2025", url: "https://www.verizon.com/business/resources/reports/dbir/" },
     ],
     doAndDont: {
       do: [
@@ -71,9 +73,11 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "Yahoo: the largest data breach in history — 3 billion accounts",
-      story: "In 2013–2014, hackers breached Yahoo's servers and stole data from all 3 billion users. The attack wasn't discovered until 2016. The cause: an outdated MD5 hashing algorithm and millions of users with passwords like 'password123'. Yahoo's stock fell, and the Verizon acquisition deal dropped by $350 million.",
-      lesson: "Even large companies can be breached. Your protection: unique passwords for every site — a leak from one service shouldn't open access to everything else.",
+      kind: "real",
+      title: "Yahoo: 3 billion accounts in a single breach",
+      story: "In August 2013, attackers stole Yahoo user data: names, email addresses, phone numbers, dates of birth, password hashes and security questions. Yahoo disclosed the breach only in December 2016, and in October 2017 admitted that every account existing at the time — about 3 billion — was affected. Passwords were stored as hashes using the outdated MD5 algorithm. Because of this and a separate 2014 breach, Verizon cut its purchase price for Yahoo by $350 million.",
+      lesson: "Even large companies lose data. Your protection is a unique password for every site plus two-factor authentication: a leak at one service shouldn't unlock all the others.",
+      source: { label: "Dark Reading, 2017", url: "https://www.darkreading.com/attacks-breaches/yahoo-all-3-billion-accounts-affected-in-2013-breach/d/d-id/1330039" },
     },
     video: "https://www.youtube.com/embed/4yCVx8aQ3nM",
     tips: ["Minimum 12 characters — mix cases, digits, and symbols.", "Use a password manager instead of trying to memorize."],
@@ -91,10 +95,10 @@ const lessonsEN = [
       { term: "Typosquatting", def: "Registering domains similar to popular sites with slight misspellings to catch mistyping users.", example: "Example: 'g00gle.com' (zero instead of 'o') — a Google lookalike designed to steal logins." },
     ],
     keyFacts: [
-      "90% of all cyberattacks start with phishing — Proofpoint State of the Phish 2023",
-      "On average 30% of recipients open phishing emails",
-      "A new phishing attack occurs every 11 seconds worldwide",
-      "The average cost of a successful phishing attack on a company: $1.6M",
+      { text: "Without training, roughly one in three employees (34.3%) clicks a link in a simulated phishing email.", source: "KnowBe4 Phishing Benchmarking Report, 2024", url: "https://www.knowbe4.com/press/knowbe4s-annual-phishing-benchmarking-report-shows-focusing-on-the-human-element-still-the-best-safeguard-against-cyber-threats" },
+      { text: "Business email compromise (BEC) earned criminals about $2.8 billion in 2024.", source: "FBI IC3 Internet Crime Report, 2024", url: "https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf" },
+      { text: "Phone fraud was the most common type (25.5%) among cases Kazakhstan's Anti-Fraud Center prevented in its first six months.", source: "Astana Times, 2025", url: "https://astanatimes.com/?p=95399" },
+      { text: "The average loss per complaint to the FBI rose in one year from $14,197 to $19,372.", source: "FBI IC3 Internet Crime Report, 2024", url: "https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf" },
     ],
     doAndDont: {
       do: [
@@ -111,9 +115,11 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "Ubiquiti: $46.7M lost from a single phishing email",
-      story: "In 2015, a Ubiquiti Networks employee received an email allegedly from the CEO requesting an urgent wire transfer to close a deal. The message was convincing — the fraudsters had researched the company's structure via LinkedIn. 17 transfers totaling $46.7M were made to accounts in Hong Kong, China, Russia, and Poland. Most of the money was never recovered.",
-      lesson: "Any request for a money transfer or data handover via email requires verification through an independent channel — call or message the person directly.",
+      kind: "real",
+      title: "Ubiquiti: $46.7M lost to fraudulent transfer requests",
+      story: "In 2015, US company Ubiquiti Networks discovered that its Hong Kong subsidiary had wired $46.7 million to fraudsters. The attackers impersonated company employees and sent fake transfer requests to the finance department. Only part of the money was recovered — $8.1 million at the time of the report. The chief accounting officer resigned, and auditors identified material weaknesses in internal controls.",
+      lesson: "Any request to move money or share data needs confirmation through an independent channel: call the person on a number you already know instead of replying to the email.",
+      source: { label: "Ubiquiti Networks, Form 10-K, SEC, 2015", url: "https://www.sec.gov/Archives/edgar/data/0001511737/000151173715000022/ubnt-06302015x10k.htm" },
     },
     video: "https://www.youtube.com/embed/Ro_z43h6v_Q",
     tips: ["Verify the sender's domain and don't open suspicious attachments.", "If in doubt, call the organization on their official number."],
@@ -131,10 +137,10 @@ const lessonsEN = [
       { term: "Credential Stuffing", def: "Automatically checking stolen login/password pairs from data breaches against hundreds of other sites.", example: "Example: if one site is breached, bots immediately try the same credentials on Instagram, Gmail, and online banking." },
     ],
     keyFacts: [
-      "70% of public profiles contain enough data to steal an identity",
-      "500 million LinkedIn accounts were stolen and listed for sale in 2021",
-      "Over 500,000 new accounts are created on Facebook every minute — including fake ones",
-      "Scammers spend an average of 20 minutes on OSINT before a targeted attack",
+      { text: "Social media is the contact method with the highest fraud losses in the US: $1.4 billion in 2023.", source: "FTC Consumer Sentinel, 2023", url: "https://consumer.ftc.gov/consumer-alerts/2024/02/think-you-know-what-top-scam-2023-was-take-guess" },
+      { text: "The most common social media scams involve online shopping, while the biggest losses come from fake 'investments'.", source: "FTC Data Spotlight, 2023", url: "https://www.ftc.gov/news-events/data-visualizations/data-spotlight/2023/10/social-media-golden-goose-scammers" },
+      { text: "Meta removes over a billion fake Facebook accounts per quarter: 1.4 billion in Q4 2024.", source: "Meta Transparency Center, 2024", url: "https://transparency.meta.com/reports/community-standards-enforcement/fake-accounts/facebook/" },
+      { text: "In 2021, data from about 700 million LinkedIn profiles was put up for sale — scraped automatically from public information.", source: "LinkedIn, 2021", url: "https://news.linkedin.com/2021/june/an-update-from-linkedin" },
     ],
     doAndDont: {
       do: [
@@ -151,9 +157,10 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "How an open Instagram led to a loan taken out in someone else's name",
-      story: "A businesswoman from Almaty ran a public Instagram with 50,000 followers. Her posts revealed her full name, a document with her IIN, her company name, and her bank. Fraudsters collected the data, forged documents, and took out a 2 million tenge loan at a microfinance organization. She only learned of it when calls about overdue payments began.",
-      lesson: "An open social media profile is a shop window for fraudsters. The less personal information you publish publicly, the harder it is to use against you.",
+      kind: "illustrative",
+      title: "How a public Instagram could lead to a loan in someone else's name",
+      story: "Imagine a businesswoman from Almaty with a public Instagram and 50,000 followers. Her posts show her full name, a photo of a document with her IIN, her company name and her bank. Fraudsters collect this data, forge documents and take out a 2 million tenge microloan. She finds out only when debt collectors start calling.",
+      lesson: "A public social media profile is a shop window for fraudsters. The less personal information you publish, the harder it is to use against you.",
     },
     video: "https://www.youtube.com/embed/v7C6_jcmPSU",
     tips: ["Don't add strangers and verify links before clicking.", "Restrict access to personal information in your privacy settings."],
@@ -171,10 +178,10 @@ const lessonsEN = [
       { term: "Spyware", def: "Software that covertly monitors user activity: keystrokes, passwords, webcam, and microphone.", example: "Example: a keylogger records everything you type, including passwords and card numbers." },
     ],
     keyFacts: [
-      "More than 450,000 new malware samples are created every day — AV-TEST Institute",
-      "The average ransomware ransom grew to $812,000 in 2022",
-      "WannaCry infected 300,000 computers across 150 countries in just 4 days in 2017",
-      "66% of small businesses hit by ransomware close within 6 months",
+      { text: "AV-TEST registers over 450,000 new malicious and potentially unwanted programs every day.", source: "AV-TEST Institute", url: "https://www.av-test.org/en/statistics/malware/" },
+      { text: "The median ransomware payment is $1 million, and almost half of affected organizations (49%) pay.", source: "Sophos State of Ransomware, 2025", url: "https://www.sophos.com/en-us/blog/the-state-of-ransomware-2025" },
+      { text: "Recovering from a ransomware attack costs $1.53 million on average — not counting the ransom.", source: "Sophos State of Ransomware, 2025", url: "https://www.sophos.com/en-us/blog/the-state-of-ransomware-2025" },
+      { text: "In 2017, WannaCry infected more than 200,000 computers in at least 100 countries.", source: "UK National Audit Office, 2017", url: "https://www.nao.org.uk/wp-content/uploads/2017/10/Investigation-WannaCry-cyber-attack-and-the-NHS-Summary.pdf" },
     ],
     doAndDont: {
       do: [
@@ -191,9 +198,11 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "WannaCry: how one unpatched computer infected an entire hospital",
-      story: "In May 2017, the WannaCry ransomware exploited a Windows vulnerability for which Microsoft had released a patch two months earlier. UK NHS hospitals that hadn't updated were completely paralyzed: doctors couldn't access patient records, operations were cancelled, and ambulances didn't know where to take patients. The cost to NHS alone was £92 million.",
-      lesson: "One unfixed vulnerability on one device can cripple an entire organization. Timely updates and backups aren't optional — they're critical.",
+      kind: "real",
+      title: "WannaCry: how missing updates paralyzed hospitals",
+      story: "In May 2017, the WannaCry ransomware exploited a Windows vulnerability that Microsoft had patched in March — two months before the attack. In the UK, at least 81 of 236 NHS hospital trusts and another 603 healthcare organizations were affected. NHS England estimated around 19,000 appointments and operations were cancelled. The National Audit Office found that every infected organization was running unpatched or unsupported Windows.",
+      lesson: "One unpatched vulnerability can paralyze an entire organization. Timely updates and backups aren't optional — they're essential.",
+      source: { label: "UK National Audit Office, 2017", url: "https://www.nao.org.uk/wp-content/uploads/2017/10/Investigation-WannaCry-cyber-attack-and-the-NHS-Summary.pdf" },
     },
     video: "https://www.youtube.com/embed/ziHQJkrsVPI",
     tips: ["Don't download suspicious files and keep your antivirus current.", "Regularly back up your important data."],
@@ -211,10 +220,10 @@ const lessonsEN = [
       { term: "WPA3", def: "The modern Wi-Fi encryption protocol, significantly more secure than outdated WPA2, even protecting weak router passwords.", example: "Example: when setting up a home router, choose WPA3 or WPA2/WPA3 in the security settings." },
     ],
     keyFacts: [
-      "70% of users connect to public Wi-Fi while traveling without a VPN",
-      "An Evil Twin access point can be created for less than $50 of equipment",
-      "Open Wi-Fi networks transmit data unencrypted — anyone on the network can read it",
-      "Attacks via public Wi-Fi grew 150% from 2019 to 2023",
+      { text: "On a classic open network (no password), data over the air is not encrypted — other connected users can intercept it.", source: "Wi-Fi Alliance", url: "https://www.wi-fi.org/discover-wi-fi/security" },
+      { text: "Anyone can choose a network name (SSID): 'Airport_Free_WiFi' on your screen doesn't prove the airport runs it.", source: "How Wi-Fi works" },
+      { text: "WPA3 is the current Wi-Fi security standard, introduced by the Wi-Fi Alliance in 2018. If your router supports it, turn it on.", source: "Wi-Fi Alliance", url: "https://www.wi-fi.org/discover-wi-fi/security" },
+      { text: "HTTPS encrypts page content but doesn't hide which site you connect to: the domain name remains visible on the network.", source: "How TLS works" },
     ],
     doAndDont: {
       do: [
@@ -231,9 +240,11 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "Evil Twin in a London café: 47 bank accounts compromised in one day",
-      story: "In 2022, police in London arrested a hacker who had spent weeks deploying Evil Twin access points in popular cafés. He named his network identically to the venue's official one and intercepted visitors' traffic. In a single day at one café, he obtained credentials for 47 bank accounts. Victims noticed nothing — it all looked like normal Wi-Fi.",
-      lesson: "A public network offers no guarantees. Even HTTPS doesn't always protect against MITM via SSL stripping. A VPN is essential when handling sensitive data outside your home.",
+      kind: "real",
+      title: "An 'evil twin' at airports and on board a plane",
+      story: "In 2024, the Australian Federal Police charged a 42-year-old man. Police allege he set up fake free Wi-Fi networks at airports in Perth, Melbourne and Adelaide, and even on domestic flights. People who connected were sent to a fake login page asking for their email or social media credentials, which were stored on his devices. The investigation began when an airline reported a suspicious network on board.",
+      lesson: "A network name guarantees nothing. Don't enter passwords or personal data for 'free Wi-Fi', and use mobile data for anything important while travelling.",
+      source: { label: "Malwarebytes / AFP, 2024", url: "https://www.malwarebytes.com/blog/news/2024/07/personal-data-stolen-from-unsuspecting-airport-visitors-and-plane-passengers-in-evil-twin-attacks-man-charged" },
     },
     video: "https://www.youtube.com/embed/XQryg-FUYlI",
     tips: ["Use a VPN on public networks.", "Don't connect to unknown Wi-Fi and check your home router settings."],
@@ -251,10 +262,10 @@ const lessonsEN = [
       { term: "Exploit", def: "Code or technique that leverages a specific vulnerability to gain unauthorized access or execute malicious code.", example: "Example: the EternalBlue exploit used a Windows SMB vulnerability to spread WannaCry." },
     ],
     keyFacts: [
-      "60% of breaches exploit vulnerabilities for which a patch already existed — Ponemon Institute",
-      "Average time from patch release to mass exploitation: 14 days",
-      "The Equifax breach (147M people) was caused by a patch not installed for 2 months",
-      "Automatic updates reduce the risk of known-vulnerability attacks by 85%",
+      { text: "In 2023, vulnerabilities were exploited on average 5 days after disclosure. In 2018–2019 it took 63 days.", source: "Google Mandiant, 2024", url: "https://cloud.google.com/blog/topics/threat-intelligence/time-to-exploit-trends-2023" },
+      { text: "Vulnerability exploitation causes 20% of breaches, and its share grew 34% in a year.", source: "Verizon DBIR, 2025", url: "https://www.verizon.com/business/resources/reports/dbir/" },
+      { text: "60% of surveyed organizations said a breach came through a vulnerability that already had a patch which wasn't applied.", source: "Ponemon Institute / ServiceNow, 2019 survey", url: "https://www.bitdefender.com/en-us/blog/businessinsights/60-of-breaches-in-2019-involved-unpatched-vulnerabilities" },
+      { text: "Of 138 vulnerabilities exploited in 2023, 97 were attacked before a patch existed — so install updates as soon as they appear.", source: "Google Mandiant, 2024", url: "https://cloud.google.com/blog/topics/threat-intelligence/time-to-exploit-trends-2023" },
     ],
     doAndDont: {
       do: [
@@ -271,9 +282,11 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "Equifax: 147 million records stolen due to an uninstalled patch",
-      story: "In 2017, hackers breached credit bureau Equifax and stole personal data of 147 million Americans: names, Social Security numbers, dates of birth, addresses, and card numbers. The cause: Apache Struts vulnerability CVE-2017-5638, for which a patch had been available for two months. Equifax's IT team knew about the update but hadn't installed it. The company paid $575 million in fines.",
-      lesson: "Patches exist for a reason. Every day you delay installing an update is a day hackers can exploit a known flaw. Auto-updates are the simplest protection.",
+      kind: "real",
+      title: "Equifax: data of nearly 150 million people due to a missed patch",
+      story: "In March 2017, a fix was released for a critical Apache Struts vulnerability (CVE-2017-5638). Equifax policy required such patches within 48 hours, but the alert never reached the responsible developer, and a consumer dispute portal stayed vulnerable. About two months later, attackers broke in and took data on roughly 147 million people: names, Social Security numbers, dates of birth and addresses. Settling with US regulators cost the company at least $575 million.",
+      lesson: "Patches exist for a reason. Every day of delay is a day attackers can use a known hole. Automatic updates are the simplest protection.",
+      source: { label: "U.S. GAO, GAO-18-559, 2018", url: "https://www.gao.gov/products/gao-18-559" },
     },
     video: "https://www.youtube.com/embed/CU7Kqft8VQk",
     tips: ["Enable automatic updates wherever possible.", "Updates fix vulnerabilities — you can't ignore them."],
@@ -291,10 +304,10 @@ const lessonsEN = [
       { term: "Data Minimization", def: "The principle that a service should only collect data strictly necessary for its function, and not keep it longer than needed.", example: "Example: a flashlight app requesting access to contacts and location violates data minimization." },
     ],
     keyFacts: [
-      "The average app requests 17 device permissions — AppCensus",
-      "Facebook earns an average of $40 per user per year through data",
-      "87 million Facebook profiles were shared with Cambridge Analytica without user consent",
-      "India's Aadhaar biometric data leak affected 1.1 billion people",
+      { text: "81% of Americans are concerned about how companies use the data collected about them, and 67% understand little to nothing about what happens to it.", source: "Pew Research Center, 2023", url: "https://www.pewresearch.org/internet/2023/10/18/how-americans-view-data-privacy/" },
+      { text: "69% of people see privacy policies as just something to click past.", source: "Pew Research Center, 2023", url: "https://www.pewresearch.org/internet/2023/10/18/how-americans-view-data-privacy/" },
+      { text: "Cambridge Analytica obtained data on up to 87 million Facebook users — mostly friends of people who took a quiz.", source: "Meta (Facebook), 2018", url: "https://about.fb.com/news/2018/04/restricting-data-access/" },
+      { text: "In 2019, personal data of about 11 million Kazakh citizens — IINs, birth dates, addresses — became publicly accessible.", source: "Forbes Kazakhstan, 2019", url: "https://forbes.kz/articles/nachato_rassledovanie_utechki_personalnyih_dannyih_11_mln_kazahstantsev" },
     ],
     doAndDont: {
       do: [
@@ -311,11 +324,13 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "Cambridge Analytica: how data from 87 million users influenced elections",
-      story: "In 2018, one of the biggest internet scandals erupted. Cambridge Analytica collected data on 87 million users through a Facebook quiz app — not only those who took the quiz, but all their friends too. The data was used to build psychological profiles and serve targeted political ads during the US election and Brexit referendum. Facebook's stock dropped $50 billion in a single day.",
-      lesson: "When an app asks for permissions — it's not a formality. You're sharing real data about yourself and your contacts. Always ask: why does this app need this access?",
+      kind: "real",
+      title: "Cambridge Analytica: 87 million people's data from one quiz",
+      story: "In 2014, a researcher released a personality quiz app on Facebook. About 270,000 people took it, but the platform's rules at the time let the app collect data on their friends too. Data on up to 87 million users ended up with Cambridge Analytica, which used it for political advertising. The scandal broke in March 2018; Facebook lost about $50 billion in market value within two days, and in 2019 the US FTC fined the company $5 billion.",
+      lesson: "An app permission isn't a formality: you're handing over data about yourself and sometimes your contacts. Always ask: why does this app need this access?",
+      source: { label: "Meta (Facebook), 2018", url: "https://about.fb.com/news/2018/04/restricting-data-access/" },
     },
-    video: "https://www.youtube.com/embed/YRabVu8zQZA",
+    video: "https://www.youtube.com/embed/4VpoAOXb0zg",
     tips: ["Use 2FA and strong passwords.", "Don't share personal documents with unverified services."],
     testPath: "/test/8", next: "recovery",
   },
@@ -331,10 +346,10 @@ const lessonsEN = [
       { term: "Credential Stuffing", def: "Automated attack: credentials stolen from one service are tested against thousands of other sites.", example: "Example: after a forum breach, hackers immediately test those credentials on Gmail and Instagram." },
     ],
     keyFacts: [
-      "Average time to detect a data breach: 207 days — IBM Cost of a Data Breach Report",
-      "62% of breach victims learn about it from third parties, not themselves",
-      "Changing your password within 30 minutes of detecting a breach reduces damage by 70%",
-      "The 3-2-1 rule protects against ransomware: encrypted files are restored from the offline copy",
+      { text: "On average, organizations take 181 days to identify a breach and another 60 days to contain it.", source: "IBM Cost of a Data Breach, 2025", url: "https://www.ibm.com/reports/data-breach" },
+      { text: "The global average cost of a data breach is $4.44 million.", source: "IBM Cost of a Data Breach, 2025", url: "https://www.ibm.com/reports/data-breach" },
+      { text: "According to Microsoft, an account with multi-factor authentication is more than 99.9% less likely to be compromised.", source: "Microsoft Security Blog, 2019", url: "https://www.microsoft.com/en-us/security/blog/2019/08/20/one-simple-action-you-can-take-to-prevent-99-9-percent-of-account-attacks/" },
+      { text: "The 3-2-1 rule: three copies of your data, on two different media, one offsite or offline. Your files survive both hardware failure and ransomware.", source: "CISA (US-CERT)", url: "https://www.cisa.gov/sites/default/files/publications/data_backup_options.pdf" },
     ],
     doAndDont: {
       do: [
@@ -351,9 +366,10 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "$2,700 in 45 minutes: phishing via 'Kaspi Bank' in Nur-Sultan",
-      story: "A student in Nur-Sultan received an SMS allegedly from Kaspi Bank asking to confirm a transaction. Following the link, he arrived at a site indistinguishable from the real one and entered his card details and SMS code. Within 45 minutes, 1.2 million tenge was withdrawn in several transactions. The bank could only recover part of the funds because the student had personally entered the authorization code.",
-      lesson: "If you get a call or message from your 'bank' — hang up and call back on the number printed on your card. An SMS code is permission for a transaction. Never enter it at someone else's request.",
+      kind: "illustrative",
+      title: "1.2 million tenge in 45 minutes: phishing in Kaspi's name",
+      story: "A student in Astana gets an SMS supposedly from Kaspi Bank: 'Confirm the transaction'. The link leads to a site indistinguishable from the real one, and he enters his card details and the SMS code. Within 45 minutes, 1.2 million tenge leaves his card in several transfers. The bank refunds only part of it: the student entered the authorization code himself.",
+      lesson: "If someone calls or texts 'from the bank', hang up and call the number on your card. An SMS code authorizes a transaction — never enter or share it at someone else's request.",
     },
     video: "https://www.youtube.com/embed/C_Al2cnFChU",
     tips: ["Change passwords immediately and notify support services.", "Check activity across all devices and end suspicious sessions."],
@@ -371,10 +387,10 @@ const lessonsEN = [
       { term: "Security Hygiene", def: "Regular cybersecurity practices that have become habit — like brushing your teeth, but for your digital life.", example: "Example: change passwords quarterly, review privacy settings monthly, back up data weekly." },
     ],
     keyFacts: [
-      "Users who complete cybersecurity training are 70% less likely to fall for phishing",
-      "Companies with a security culture recover from incidents 3× faster",
-      "Preventing an attack costs 10× less on average than recovering from one",
-      "A hacker attack occurs every 39 seconds worldwide — University of Maryland",
+      { text: "After 90 days of training, the share of employees clicking simulated phishing drops from 34.3% to 18.9%, and after a year to 4.6%.", source: "KnowBe4 Phishing Benchmarking Report, 2024", url: "https://www.knowbe4.com/press/knowbe4s-annual-phishing-benchmarking-report-shows-focusing-on-the-human-element-still-the-best-safeguard-against-cyber-threats" },
+      { text: "More than 10,000 people in Kazakhstan fell victim to phone fraud, with an average loss of about 2.8 million tenge.", source: "DKNews citing the NBK Anti-Fraud Center, 2025", url: "https://dknews.kz/en/articles-in-english/374933-digital-fraud-in-kazakhstan-new-data-key-schemes-and" },
+      { text: "Organizations that make heavy use of AI and automation in security identify and contain breaches 80 days faster.", source: "IBM Cost of a Data Breach, 2025", url: "https://www.ibm.com/reports/data-breach" },
+      { text: "Even basic protection works: just adding a recovery phone number blocks up to 99% of bulk phishing attacks on a Google account.", source: "Google Security Blog, 2019", url: "https://security.googleblog.com/2019/05/new-research-how-effective-is-basic.html" },
     ],
     doAndDont: {
       do: [
@@ -391,9 +407,10 @@ const lessonsEN = [
       ],
     },
     cases: {
-      title: "How one trained employee saved a company from a $33K BEC attack",
-      story: "An employee at an Almaty company received an email 'from the director' requesting an urgent 15 million tenge transfer to a supplier — with one letter different in the address. Thanks to corporate phishing training completed a month earlier, she noticed the discrepancy, called the director directly, and discovered: no transfer was planned. The attack was stopped. Colleagues at a neighboring office lost 8 million that same week in a similar scheme.",
-      lesson: "One trained person can protect an entire organization. Knowledge isn't theory — it's a practical defense tool. You've already taken the first step by completing this course.",
+      kind: "illustrative",
+      title: "How one trained employee can stop a BEC attack",
+      story: "An accountant at an Almaty company gets an email 'from the director': urgently transfer 15 million tenge to a supplier. The sender's address differs by one letter. She completed phishing training a month earlier, so she spots the swap, calls the director directly and learns that no transfer was planned. The attack is stopped.",
+      lesson: "One trained person can protect an entire organization. Knowledge is a practical defense tool — and you've already taken the first step by completing this course.",
     },
     video: "https://www.youtube.com/embed/oWu3FT1CJeE",
     tips: ["Review the key takeaways from all lessons.", "Take the final test to consolidate your knowledge."],

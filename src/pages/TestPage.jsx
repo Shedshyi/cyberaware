@@ -10,7 +10,14 @@ import { saveTestResult } from "../lib/store";
 
 const TIMER_SEC = 180;
 
-export default function TestPage() {
+// Отдельный экземпляр на каждый тест: без key состояние (ответы, результат)
+// переезжало бы при переходе /test/1 → /test/2.
+export default function TestPageRoute() {
+  const { id } = useParams();
+  return <TestPage key={id} />;
+}
+
+function TestPage() {
   const { id }    = useParams();
   const navigate  = useNavigate();
   const { t, lang } = useLanguage();

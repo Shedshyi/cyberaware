@@ -21,6 +21,10 @@ import URLScannerPage from "./pages/URLScannerPage";
 import ProfilePage from "./pages/ProfilePage";
 import CertificatePage from "./pages/CertificatePage";
 import LoginPage from "./pages/LoginPage";
+import OnboardingPage from "./pages/research/OnboardingPage";
+import AssessmentPage from "./pages/research/AssessmentPage";
+import ResearchDashboard from "./pages/research/ResearchDashboard";
+import ResearchGate from "./research/ResearchGate";
 import NotFound from "./pages/NotFound";
 import './styles.css';
 
@@ -30,6 +34,7 @@ function App() {
     <AuthProvider>
     <Router>
       <div className="app-layout">
+        <ResearchGate />
         <HeaderBar />
         <main className="site-content">
           <Routes>
@@ -50,6 +55,9 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/certificate" element={<CertificatePage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/research/start" element={<OnboardingPage />} />
+            <Route path="/research/dashboard" element={<ResearchDashboard />} />
+            <Route path="/research/:phase" element={<AssessmentPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

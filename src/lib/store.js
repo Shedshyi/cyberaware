@@ -77,7 +77,7 @@ export async function saveTestResult({ testId, score, total, answers = [], durat
     })
     .select("id")
     .single();
-  if (error) return warn("saveTestResult", error);
+  if (error) { warn("saveTestResult", error); return { ok: false, error }; }
 
   if (answers.length) {
     const rows = answers.map(a => ({
@@ -90,6 +90,19 @@ export async function saveTestResult({ testId, score, total, answers = [], durat
     const { error: aErr } = await supabase.from("answers").insert(rows);
     warn("saveTestResult/answers", aErr);
   }
+  return { ok: true };
+}
+
+/** Сохраняет ответы анкеты участника. */
+export async function saveOnboarding(fields) {
+  if (!supabase || !currentUserId) return { ok: false };
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ ...fields, consent: true, consent_at: now, onboarded_at: now })
+    .eq("id", currentUserId);
+  warn("saveOnboarding", error);
+  return { ok: !error, error };
 }
 
 // ── Уроки ────────────────────────────────────────────────────
@@ -122,8 +135,8 @@ export async function hydrateFromServer(userId) {
   const [profileRes, attemptsRes, lessonsRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).single(),
     supabase.from("test_attempts")
-      .select("test_id, score, total, created_at")
-      .eq("user_id", userId).eq("phase", "practice")
+      .select("test_id, phase, score, total, created_at")
+      .eq("user_id", userId)
       .order("created_at", { ascending: true }),
     supabase.from("events")
       .select("payload, created_at")
@@ -137,10 +150,12 @@ export async function hydrateFromServer(userId) {
   const remote = profileRes.data;
 
   // Последняя попытка по каждому тесту — так же, как работал локальный режим
+  const research = { pre: null, post: null };
   if (attemptsRes.data) {
     const results = {};
     for (const a of attemptsRes.data) {
-      results[a.test_id] = { score: a.score, total: a.total, date: a.created_at };
+      if (a.phase === "practice") results[a.test_id] = { score: a.score, total: a.total, date: a.created_at };
+      else research[a.phase] = { score: a.score, total: a.total, date: a.created_at };
     }
     writeJSON(KEYS.results, results);
   }
@@ -168,7 +183,7 @@ export async function hydrateFromServer(userId) {
       else localStorage.removeItem(KEYS.profile);
     }
   }
-  return remote;
+  return { profile: remote, research };
 }
 
 export function clearPersonalData() {

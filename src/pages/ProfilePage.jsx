@@ -6,6 +6,8 @@ import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/AuthContext";
 import { getProfile, getTestResults, saveProfile } from "../lib/store";
+import { RESEARCH } from "../research/config";
+import "../research/research.css";
 
 const AVATAR_COLORS = [
   { id: "indigo", value: "#6366f1" },
@@ -33,6 +35,40 @@ function getBadges(lang) {
 
 const loadProfile = getProfile;
 const loadResults = getTestResults;
+
+function ResearchStatus({ lang, practiceDone }) {
+  const { enabled, user, profile, research } = useAuth();
+  if (!RESEARCH.enabled || !enabled || !user || !profile) return null;
+  const en = lang === "en";
+  const p = (r) => Math.round((r.score / r.total) * 100);
+
+  if (profile.role === "researcher") {
+    return (
+      <div className="rs-status">
+        <span>🔬 {en ? "You have the researcher role." : "У тебя роль исследователя."}</span>
+        <Link to="/research/dashboard" className="rs-btn rs-btn-primary">{en ? "Study results →" : "Результаты исследования →"}</Link>
+      </div>
+    );
+  }
+  if (!research.pre) return null;
+
+  const need = RESEARCH.postTestMinPracticeTests;
+  return (
+    <div className="rs-status">
+      <span>
+        🔬 {en ? "Entry test:" : "Входной тест:"} <b>{p(research.pre)}%</b>
+        {research.post
+          ? <> · {en ? "Final test:" : "Итоговый тест:"} <b>{p(research.post)}%</b></>
+          : practiceDone >= need
+            ? <> · {en ? "The final test is open!" : "Итоговый тест открыт!"}</>
+            : <> · {en ? `Final test after ${need} practice tests (${practiceDone}/${need})` : `Итоговый тест после ${need} практических тестов (${practiceDone}/${need})`}</>}
+      </span>
+      {!research.post && practiceDone >= need && (
+        <Link to="/research/post" className="rs-btn rs-btn-primary">{en ? "Take the final test →" : "Пройти итоговый тест →"}</Link>
+      )}
+    </div>
+  );
+}
 
 function AccountCard({ lang }) {
   const { enabled, user, signOut } = useAuth();
@@ -283,6 +319,7 @@ export default function ProfilePage() {
         </motion.div>
 
         <AccountCard lang={lang} />
+        <ResearchStatus lang={lang} practiceDone={passed} />
 
         {allPassed && (
           <motion.div className="profile-cert-banner" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.5 }}>
