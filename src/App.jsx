@@ -25,8 +25,10 @@ import OnboardingPage from "./pages/research/OnboardingPage";
 import AssessmentPage from "./pages/research/AssessmentPage";
 import ResearchDashboard from "./pages/research/ResearchDashboard";
 import ResearchGate from "./research/ResearchGate";
+import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./pages/NotFound";
 import './styles.css';
+import './mobile.css'; // после styles.css — переопределяет его правила
 
 function App() {
   return (
@@ -34,6 +36,7 @@ function App() {
     <AuthProvider>
     <Router>
       <div className="app-layout">
+        <ScrollToTop />
         <ResearchGate />
         <HeaderBar />
         <main className="site-content">

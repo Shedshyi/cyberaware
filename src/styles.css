@@ -77,15 +77,6 @@ a {
   border-radius: 8px;
 }
 
-.app-footer {
-  background: #111827;
-  color: #fff;
-  padding: 30px 20px;
-  text-align: center;
-  border-top: 4px solid var(--teal);
-  margin-top: 50px;
-}
-
 .home-page {
   max-width: 1180px;
   margin: 0 auto;

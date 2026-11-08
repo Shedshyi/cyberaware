@@ -378,7 +378,7 @@ export default function ProfilePage() {
                 <div className="profile-test-name">
                   {name}
                   {isWeak && (
-                    <Link to={`/test/${id}`} style={{ marginLeft: 8, fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>
+                    <Link to={`/test/${id}`} className="profile-retry">
                       {lang === "en" ? "Retry →" : "Повторить →"}
                     </Link>
                   )}

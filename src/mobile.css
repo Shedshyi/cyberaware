@@ -1,0 +1,162 @@
+/* ════════════════════════════════════════════════════════════════
+   Футер (.ft-*) и правки мобильной вёрстки.
+   Подключается после styles.css, поэтому переопределяет его правила.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.ft-root {
+  margin-top: 56px;
+  padding: 40px 24px 28px;
+  background: #0f1117;
+  color: #94a0b4;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+.ft-inner {
+  max-width: 1112px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px 40px;
+  flex-wrap: wrap;
+}
+.ft-logo { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: #e2e8f0; }
+.ft-logo span { color: #a5b4fc; }
+.ft-tagline { margin: 8px 0 0; font-size: 14px; line-height: 1.5; max-width: 340px; }
+.ft-links { display: flex; flex-wrap: wrap; gap: 4px 4px; margin: -8px; }
+.ft-links a {
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 8px;
+}
+.ft-links a:hover { color: #fff; background: rgba(255, 255, 255, .06); }
+.ft-copy {
+  max-width: 1112px;
+  margin: 28px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  font-size: 13px;
+}
+
+/* Анимации появления сдвигают элементы вбок — без этого на телефоне
+   на мгновение появляется горизонтальная прокрутка */
+html, body { overflow-x: clip; }
+
+/* ── Мелкие ссылки: увеличиваем область нажатия ─────────────── */
+.trainer-back, .hg-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.hg-back { display: flex; justify-content: center; }
+.an-weak-btn, .an-rec-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+}
+.profile-retry {
+  display: inline-block;
+  margin: 4px 0 0 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+html[data-theme="dark"] .profile-retry { background: rgba(245, 158, 11, .15); color: #fbbf24; }
+
+/* ── Телефон ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Главная: hero */
+  .hv2-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hv2-btn-primary, .hv2-btn-secondary { justify-content: center; text-align: center; }
+
+  /* Главная: цифры в одну строку, а не столбиком на весь экран */
+  .hv2-stats { grid-template-columns: repeat(3, 1fr); }
+  .hv2-stat {
+    padding: 18px 6px;
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .hv2-stat:last-child { border-right: none; }
+  .hv2-stat-value { font-size: 24px; }
+  .hv2-stat-label { font-size: 12px; line-height: 1.3; display: block; }
+
+  /* Главная: карточки разделов — компактная строка «иконка + текст» */
+  .hv2-features { padding: 56px 16px; }
+  .hv2-section-sub { margin-bottom: 32px; font-size: 15px; }
+  .hv2-cards { gap: 12px; }
+  .hv2-card {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    column-gap: 14px;
+    row-gap: 2px;
+    padding: 18px;
+    border-radius: 16px;
+  }
+  .hv2-card > .hv2-card-icon { grid-row: 1 / span 4; width: 48px; height: 48px; border-radius: 12px; }
+  .hv2-card > * { grid-column: 2; margin: 0; }
+  .hv2-card > .hv2-card-icon { grid-column: 1; }
+  .hv2-card-tag { font-size: 12px; }
+  .hv2-card-title { font-size: 17px; }
+  .hv2-card-desc { font-size: 14px; }
+  .hv2-card-link { margin-top: 6px; }
+  .hv2-how { padding: 48px 16px 56px; }
+  .hv2-steps { gap: 12px; }
+  .hv2-step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    column-gap: 14px;
+    text-align: left;
+    padding: 16px 18px;
+  }
+  .hv2-step > .hv2-step-num { grid-row: 1 / span 2; margin: 0; width: 44px; height: 44px; }
+  .hv2-step > .hv2-step-title, .hv2-step > .hv2-step-desc { grid-column: 2; margin: 0; }
+  .hv2-step > .hv2-step-title { font-size: 16px; margin-bottom: 2px; }
+
+  /* Тесты: кнопка уходит под название на всю ширину */
+  .ts-card { padding: 16px; gap: 12px; }
+  .ts-card-left { flex: 1 1 100%; }
+  .ts-card-right {
+    flex: 1 1 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ts-action-btn { flex: 1; min-height: 44px; font-size: 0.9rem; }
+  .ts-card-score-block { flex: 1; flex-direction: row; align-items: center; gap: 10px; }
+  .ts-card-score-block .ts-action-btn { flex: 0 0 auto; margin-left: auto; padding: 8px 18px; }
+
+  /* Профиль: прогресс по тестам — название сверху, полоса ниже */
+  .profile-test-row {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    column-gap: 12px;
+  }
+  .profile-test-name { flex: 1 1 calc(100% - 100px); }
+  .profile-test-bar-wrap { order: 4; flex: 1 1 100%; width: auto; margin-left: 40px; }
+  .profile-activity-row { align-items: flex-start; }
+  .profile-activity-text { font-size: 14px; line-height: 1.4; }
+  .profile-badge-desc { font-size: 12px; }
+
+  /* Аналитика */
+  .an-score-badge { font-size: 12px; }
+
+  /* Футер */
+  .ft-root { padding: 32px 16px 24px; margin-top: 40px; }
+  .ft-links { margin: 0 -8px; }
+}

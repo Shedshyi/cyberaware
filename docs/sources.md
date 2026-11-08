@@ -145,3 +145,16 @@
 28. UK National Audit Office, 2017. URL: https://www.nao.org.uk/wp-content/uploads/2017/10/Investigation-WannaCry-cyber-attack-and-the-NHS-Summary.pdf
 29. Verizon DBIR, 2025. URL: https://www.verizon.com/business/resources/reports/dbir/
 30. Wi-Fi Alliance. URL: https://www.wi-fi.org/discover-wi-fi/security
+
+## Источники в пояснениях тестов и тренажёров
+
+- Тест 1.2 — Vosoughi S., Roy D., Aral S. The spread of true and false news online. *Science*, 2018. URL: https://www.media.mit.edu/publications/the-spread-of-true-and-false-news-online/
+- Тест 1.5 — Verizon Data Breach Investigations Report, 2025. URL: https://www.verizon.com/business/resources/reports/dbir/
+- Тест 4.3 — Google / Harris Poll, Online Security Survey, 2019. URL: https://services.google.com/fh/files/blogs/google_security_infographic.pdf
+- Тест 7.1 — Google Mandiant, How Low Can You Go? An Analysis of 2023 Time-to-Exploit Trends, 2024. URL: https://cloud.google.com/blog/topics/threat-intelligence/time-to-exploit-trends-2023
+- Тест 8.1 — Sweeney L. Simple Demographics Often Identify People Uniquely. Carnegie Mellon University, 2000; Narayanan A., Shmatikov V. Robust De-anonymization of Large Sparse Datasets (Netflix Prize), 2008.
+- Тест 8.2 — EFF, Panopticlick: How Unique Is Your Web Browser? (Eckersley P.), 2010. URL: https://www.eff.org/deeplinks/2010/05/every-browser-unique-results-fom-panopticlick
+- Тест 8.4 — Android 9 behavior changes: background access to microphone and camera. URL: https://developer.android.com/about/versions/pie/android-9.0-changes-all
+- Тест 9.2 — Sophos, The State of Ransomware 2021. URL: https://www.sophos.com/en-us/blog/the-state-of-ransomware-2021
+- Тест 9.3 — IBM Cost of a Data Breach Report, 2025. URL: https://www.ibm.com/reports/data-breach
+- Тренажёр «Социальная инженерия» — Tischer M. et al. Users Really Do Plug in USB Drives They Find. IEEE Symposium on Security and Privacy, 2016.

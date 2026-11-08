@@ -38,7 +38,7 @@ const SCENARIOS_RU = [
       { text: "Сдаю в IT-отдел или службу безопасности и не подключаю сам",  score: 2 },
     ],
     correctIndex: 2,
-    explanation: "«Флешка-ловушка» — классическая техника атаки. Злоумышленники специально оставляют устройства с provocative-названиями. При подключении запускается скрипт автозапуска или эксплойт. Исследования показывают, что ~48% людей подключают найденные флешки. Оставить на ресепшн — тоже плохо: её может подключить кто-то другой.",
+    explanation: "«Флешка-ловушка» — классическая техника атаки. Злоумышленники специально оставляют устройства с интригующими надписями. Такая флешка может содержать вредоносный файл, эксплойт или притворяться клавиатурой и сама «набирать» команды. В эксперименте Иллинойсского университета (2016) из 297 подброшенных флешек 98% подобрали, а как минимум на 45% открыли файлы. Оставить её на ресепшн — тоже плохо: её может подключить кто-то другой. Правильно — отдать в IT-отдел или службу безопасности.",
   },
   {
     id: 4,
@@ -113,7 +113,7 @@ const SCENARIOS_EN = [
       { text: "Hand it to IT security and don't plug it in myself",             score: 2 },
     ],
     correctIndex: 2,
-    explanation: "'Baiting' with USB drives is a classic attack. Attackers intentionally leave devices with provocative labels. Plugging one in can execute an autorun script or exploit. Studies show ~48% of people plug in found USB drives. Leaving it at reception is also bad — someone else might plug it in.",
+    explanation: "'Baiting' with USB drives is a classic attack. Attackers intentionally leave devices with intriguing labels. Such a drive can carry a malicious file, an exploit, or pretend to be a keyboard and 'type' commands by itself. In a University of Illinois experiment (2016), 98% of 297 dropped drives were picked up and files were opened on at least 45%. Leaving it at reception is also bad — someone else might plug it in. The right move is to hand it to IT or security.",
   },
   {
     id: 4,
