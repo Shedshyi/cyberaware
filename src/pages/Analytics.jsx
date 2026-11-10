@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useExperience } from "../research/experience";
 
 function loadResults() {
   try { return JSON.parse(localStorage.getItem("testResults")) || {}; } catch { return {}; }
@@ -27,6 +28,7 @@ function getScoreMeta(pct, lang) {
 
 export default function Analytics() {
   const { t, lang } = useLanguage();
+  const { features } = useExperience();
   const lessons = lang === "en" ? lessonsEN : lessonsRU;
   const TEST_LESSONS = Object.fromEntries(
     lessons.map(l => [l.testPath?.replace("/test/", ""), l])
@@ -293,7 +295,7 @@ export default function Analytics() {
               </Link>
             </div>
           )}
-          {avgPct < 80 && (
+          {features.trainers && avgPct < 80 && (
             <div className="an-rec-card">
               <span className="an-rec-icon">🎮</span>
               <p className="an-rec-text">
@@ -306,7 +308,7 @@ export default function Analytics() {
               </Link>
             </div>
           )}
-          {passedAll && (
+          {features.gamification && passedAll && (
             <div className="an-rec-card an-rec-card-gold">
               <span className="an-rec-icon">🏆</span>
               <p className="an-rec-text">

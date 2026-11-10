@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../auth/AuthContext";
@@ -23,6 +23,14 @@ export default function AssessmentPage() {
   const [busy, setBusy]         = useState(false);
   const [error, setError]       = useState("");
   const startedAt = useRef(0);
+  // Только время ответа — для описательной статистики. Ни подсказок, ни обратной связи.
+  const shownAt = useRef({});
+  const respMs  = useRef({});
+
+  useEffect(() => {
+    const qq = questions[current];
+    if (started && qq && shownAt.current[qq.id] === undefined) shownAt.current[qq.id] = Date.now();
+  }, [started, current, questions]);
 
   if (phase !== "pre" && phase !== "post") return <Navigate to="/" replace />;
   if (!enabled) return <Navigate to="/" replace />;
@@ -124,7 +132,7 @@ export default function AssessmentPage() {
     setBusy(true); setError("");
     const rows = questions.map(qq => {
       const original = qq.order[answers[qq.id]];
-      return { questionId: qq.id, selected: original, isCorrect: original === qq.correct };
+      return { questionId: qq.id, selected: original, isCorrect: original === qq.correct, responseMs: respMs.current[qq.id] };
     });
     const score = rows.filter(r => r.isCorrect).length;
     const res = await saveTestResult({
@@ -178,6 +186,9 @@ export default function AssessmentPage() {
                   key={i}
                   className={`tp-option${selected ? " tp-option-selected" : ""}`}
                   onClick={() => {
+                    if (respMs.current[q.id] === undefined && shownAt.current[q.id] !== undefined) {
+                      respMs.current[q.id] = Date.now() - shownAt.current[q.id];
+                    }
                     setAnswers(a => ({ ...a, [q.id]: i }));
                     // Автопереход, только если участник за это время сам не ушёл на другой вопрос
                     const from = current;

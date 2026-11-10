@@ -5,6 +5,7 @@ import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/AuthContext";
+import { useExperience } from "../research/experience";
 import { getProfile, getTestResults, saveProfile } from "../lib/store";
 import { RESEARCH } from "../research/config";
 import "../research/research.css";
@@ -228,6 +229,7 @@ function EditModal({ profile, onSave, onClose, lang }) {
 export default function ProfilePage() {
   const { lang } = useLanguage();
   const { user, loading } = useAuth();
+  const { features } = useExperience();
   const lessons = lang === "en" ? lessonsEN : lessonsRU;
   const BADGES = getBadges(lang);
 
@@ -308,7 +310,7 @@ export default function ProfilePage() {
               { value: passed,                               label: lang === "en" ? "tests completed" : "тестов пройдено" },
               { value: passed ? `${avgPct}%` : "—",         label: lang === "en" ? "avg score"       : "средний балл" },
               { value: passed ? `${bestPct}%` : "—",        label: lang === "en" ? "best result"     : "лучший результат" },
-              { value: earnedBadges.length,                  label: lang === "en" ? "badges"          : "бейджей" },
+              ...(features.gamification ? [{ value: earnedBadges.length, label: lang === "en" ? "badges" : "бейджей" }] : []),
             ].map((s) => (
               <div className="profile-hero-stat" key={s.label}>
                 <span className="profile-hero-stat-value">{s.value}</span>
@@ -321,7 +323,7 @@ export default function ProfilePage() {
         <AccountCard lang={lang} />
         <ResearchStatus lang={lang} practiceDone={passed} />
 
-        {allPassed && (
+        {features.gamification && allPassed && (
           <motion.div className="profile-cert-banner" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.5 }}>
             <div className="profile-cert-left">
               <span className="profile-cert-icon">🏆</span>
@@ -340,7 +342,7 @@ export default function ProfilePage() {
           </motion.div>
         )}
 
-        <motion.div className="profile-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.45 }}>
+        {features.gamification && <motion.div className="profile-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.45 }}>
           <p className="profile-section-title">
             🏅 {lang === "en" ? "Achievements" : "Достижения"} · {earnedBadges.length}/{BADGES.length}
           </p>
@@ -361,7 +363,7 @@ export default function ProfilePage() {
               );
             })}
           </div>
-        </motion.div>
+        </motion.div>}
 
         <motion.div className="profile-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.45 }}>
           <p className="profile-section-title">📊 {lang === "en" ? "Progress by test" : "Прогресс по тестам"}</p>
@@ -430,7 +432,7 @@ export default function ProfilePage() {
             </p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <Link to="/lessons" className="t-btn t-btn-primary">{lang === "en" ? "Go to lessons" : "Перейти к урокам"}</Link>
-              <Link to="/fun" className="t-btn t-btn-outline">{lang === "en" ? "Open trainers" : "Открыть тренажёры"}</Link>
+              {features.trainers && <Link to="/fun" className="t-btn t-btn-outline">{lang === "en" ? "Open trainers" : "Открыть тренажёры"}</Link>}
             </div>
           </motion.div>
         )}

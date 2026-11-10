@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import SkillAssessment from "../components/SkillAssessment";
+import { useExperience } from "../research/experience";
 
 function loadProfile() {
   try { return JSON.parse(localStorage.getItem("userProfile")); }
@@ -29,6 +30,7 @@ const FEATURE_EMOJIS = ["📚","✅","📊","🎮"];
 
 export default function Home() {
   const { t } = useLanguage();
+  const { features } = useExperience();
   const [profile,    setProfile]    = useState(() => loadProfile());
   const [results,    setResults]    = useState(() => loadResults());
   const [showCookie, setShowCookie] = useState(
@@ -91,7 +93,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
             <Link to="/lessons" className="hv2-btn-primary">{t("home.cta1")}</Link>
-            <Link to="/fun"     className="hv2-btn-secondary">{t("home.cta2")}</Link>
+            {features.trainers && <Link to="/fun" className="hv2-btn-secondary">{t("home.cta2")}</Link>}
           </motion.div>
         </div>
 
@@ -159,7 +161,7 @@ export default function Home() {
           <motion.div className="hv2-cards"
             variants={stagger} initial="hidden"
             whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
-            {FEATURE_KEYS.map((key, i) => (
+            {FEATURE_KEYS.map((key, i) => (key === "trainers" && !features.trainers) ? null : (
               <motion.div key={key} variants={fadeUp}>
                 <Link to={FEATURE_LINKS[i]} className="hv2-card">
                   <div className={`hv2-card-icon ${FEATURE_COLORS[i]}`}>
@@ -196,7 +198,7 @@ export default function Home() {
       </section>
 
       {/* ── SKILL ASSESSMENT ── */}
-      <SkillAssessment />
+      {features.adaptive && <SkillAssessment />}
 
       {/* ── COOKIE BANNER ── */}
       <AnimatePresence>

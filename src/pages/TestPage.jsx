@@ -6,7 +6,8 @@ import testsDataEN from "../data/testsData.en";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
-import { saveTestResult } from "../lib/store";
+import { logInteraction, saveTestResult } from "../lib/store";
+import { diffLevel } from "../adaptive/items";
 
 const TIMER_SEC = 180;
 
@@ -38,22 +39,44 @@ function TestPage() {
   const answersRef = useRef(answers);
   answersRef.current = answers;
   const startedAt = useRef(Date.now());
+  // Поведенческие данные по вопросу (входы модели): когда вопрос впервые показан,
+  // сколько мс прошло до первого выбора, была ли подсказка.
+  const shownAt = useRef({});
+  const respMs  = useRef({});
+  const hintsUsed = useRef({});
 
   const persist = (a, s, timedOut) => {
+    const topic = lessons.find(l => l.testPath === `/test/${id}`)?.id ?? null;
+    const rows = questions.map(q => ({
+      questionId: q.id,
+      selected: a[q.id] ?? null,
+      isCorrect: a[q.id] === q.correct,
+      responseMs: respMs.current[q.id],
+      hintUsed: !!hintsUsed.current[q.id],
+      difficulty: diffLevel(id, q.id),
+    }));
     saveTestResult({
       testId: id,
       score: s,
       total: questions.length,
-      answers: questions.map(q => ({
-        questionId: q.id,
-        selected: a[q.id] ?? null,
-        isCorrect: a[q.id] === q.correct,
-      })),
+      answers: rows,
       durationSec: Math.round((Date.now() - startedAt.current) / 1000),
       timedOut,
       lang,
     });
+    for (const r of rows) {
+      if (r.selected === null) continue;
+      logInteraction({
+        source: "practice", topic, itemId: `${id}.${r.questionId}`, correct: r.isCorrect,
+        responseMs: r.responseMs, hintUsed: r.hintUsed, difficulty: r.difficulty,
+      });
+    }
   };
+
+  useEffect(() => {
+    const q = questions[current];
+    if (!submitted && q && shownAt.current[q.id] === undefined) shownAt.current[q.id] = Date.now();
+  }, [current, submitted, questions]);
 
   useEffect(() => {
     if (submitted) return;
@@ -92,6 +115,9 @@ function TestPage() {
 
   const handleSelect = (optIdx) => {
     if (submitted) return;
+    if (respMs.current[q.id] === undefined && shownAt.current[q.id] !== undefined) {
+      respMs.current[q.id] = Date.now() - shownAt.current[q.id];
+    }
     setAnswers(prev => ({ ...prev, [q.id]: optIdx }));
   };
 
@@ -113,6 +139,7 @@ function TestPage() {
     setTimeLeft(TIMER_SEC);
     setTimedOut(false);
     startedAt.current = Date.now();
+    shownAt.current = {}; respMs.current = {}; hintsUsed.current = {};
   };
 
   const mins = Math.floor(timeLeft / 60);

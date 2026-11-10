@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
-import { logEvent } from "../lib/store";
+import { logEvent, logInteraction } from "../lib/store";
+import { DIFF_FROM_WORD } from "../adaptive/items";
 
 // ── Threat data (RU) ─────────────────────────────────────────────────────────
 const THREATS_RU = [
@@ -425,6 +426,8 @@ export default function HackerGame() {
 
   const current = threats[idx];
   const isTimerRunning = phase === "play";
+  const roundStartedAt = useRef(Date.now());
+  useEffect(() => { roundStartedAt.current = Date.now(); }, [timerKey, idx]);
   const timeLeft = useTimer(TIMER_SEC, isTimerRunning, () => {
     if (phase !== "play") return;
     handleResult(false, true);
@@ -433,6 +436,11 @@ export default function HackerGame() {
   const handleResult = useCallback((blocked, timedOut = false) => {
     if (phase !== "play") return;
     const isCorrect  = !timedOut && (blocked === current.isPhishing);
+    logInteraction({
+      source: "trainer:hacker_game", topic: "phishing", itemId: `${current.type}.${current.id}`,
+      correct: isCorrect, responseMs: Date.now() - roundStartedAt.current,
+      hintUsed: false, difficulty: DIFF_FROM_WORD[current.diff] ?? 2,
+    });
     const newCombo   = isCorrect ? combo + 1 : 0;
     const multi      = isCorrect ? Math.min(1 + (newCombo - 1) * 0.5, 4) : 0;
     const speedBonus = isCorrect ? Math.round((timeLeft / TIMER_SEC) * 50) : 0;

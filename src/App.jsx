@@ -26,6 +26,7 @@ import AssessmentPage from "./pages/research/AssessmentPage";
 import ResearchDashboard from "./pages/research/ResearchDashboard";
 import ResearchGate from "./research/ResearchGate";
 import ScrollToTop from "./components/ScrollToTop";
+import { ExperienceProvider, RequireFeature } from "./research/experience";
 import NotFound from "./pages/NotFound";
 import './styles.css';
 import './mobile.css'; // после styles.css — переопределяет его правила
@@ -34,6 +35,7 @@ function App() {
   return (
     <LanguageProvider>
     <AuthProvider>
+    <ExperienceProvider>
     <Router>
       <div className="app-layout">
         <ScrollToTop />
@@ -47,16 +49,16 @@ function App() {
             <Route path="/test/:id" element={<TestPage />} />
             <Route path="/tests" element={<Tests />} />
             <Route path="/analytics" element={<Analytics />} />
-            <Route path="/fun" element={<FunZone />} />
-            <Route path="/fake-news" element={<FakeNews />} />
-            <Route path="/phishing" element={<PhishingTraining />} />
-            <Route path="/data-sort" element={<DataStoringPage />} />
-            <Route path="/hacker-game" element={<HackerGame />} />
-            <Route path="/password-checker" element={<PasswordChecker />} />
-            <Route path="/social-eng" element={<SocialEngineeringPage />} />
-            <Route path="/url-scanner" element={<URLScannerPage />} />
+            <Route path="/fun" element={<RequireFeature feature="trainers"><FunZone /></RequireFeature>} />
+            <Route path="/fake-news" element={<RequireFeature feature="trainers"><FakeNews /></RequireFeature>} />
+            <Route path="/phishing" element={<RequireFeature feature="trainers"><PhishingTraining /></RequireFeature>} />
+            <Route path="/data-sort" element={<RequireFeature feature="trainers"><DataStoringPage /></RequireFeature>} />
+            <Route path="/hacker-game" element={<RequireFeature feature="trainers"><HackerGame /></RequireFeature>} />
+            <Route path="/password-checker" element={<RequireFeature feature="trainers"><PasswordChecker /></RequireFeature>} />
+            <Route path="/social-eng" element={<RequireFeature feature="trainers"><SocialEngineeringPage /></RequireFeature>} />
+            <Route path="/url-scanner" element={<RequireFeature feature="trainers"><URLScannerPage /></RequireFeature>} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/certificate" element={<CertificatePage />} />
+            <Route path="/certificate" element={<RequireFeature feature="gamification" to="/profile"><CertificatePage /></RequireFeature>} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/research/start" element={<OnboardingPage />} />
             <Route path="/research/dashboard" element={<ResearchDashboard />} />
@@ -67,6 +69,7 @@ function App() {
         <FooterBar />
       </div>
     </Router>
+    </ExperienceProvider>
     </AuthProvider>
     </LanguageProvider>
   );

@@ -9,6 +9,7 @@ import {
 } from "../../research/researchData";
 import { mean, sd, pairedTTest, welchTTest, fmt, fmtP } from "../../research/stats";
 import "../../research/research.css";
+import { useExperience } from "../../research/experience";
 
 // Колонки CSV участников: без имени и uuid — только псевдонимизированный код.
 const PARTICIPANT_COLUMNS = [
@@ -19,6 +20,7 @@ const PARTICIPANT_COLUMNS = [
 ];
 
 function CohortPill({ cohort, en }) {
+  if (!cohort) return <span className="rs-pill" style={{ background: "#f3f4f6", color: "#6b7280" }}>—</span>;
   return cohort === "control"
     ? <span className="rs-pill rs-pill-ctrl">{en ? "control" : "контроль"}</span>
     : <span className="rs-pill rs-pill-exp">{en ? "experimental" : "эксперим."}</span>;
@@ -44,6 +46,7 @@ export default function ResearchDashboard() {
   const [error, setError] = useState("");
   const [group, setGroup] = useState("");
   const isResearcher = profile?.role === "researcher";
+  const { preview, setPreview } = useExperience();
 
   const reload = () => {
     setError("");
@@ -102,6 +105,14 @@ export default function ResearchDashboard() {
           {groups.map(g => <option key={g} value={g}>{g}</option>)}
         </select>
         <button className="rs-btn rs-btn-outline" onClick={reload}>↻ {en ? "Refresh" : "Обновить"}</button>
+        <div className="rs-seg" title={en ? "How the site looks to you" : "Как сайт выглядит для тебя"}>
+          <button type="button" className={preview !== "traditional" ? "on" : ""} onClick={() => setPreview("full")}>
+            {en ? "View: experimental" : "Вид: экспериментальная"}
+          </button>
+          <button type="button" className={preview === "traditional" ? "on" : ""} onClick={() => setPreview("traditional")}>
+            {en ? "View: control" : "Вид: контрольная"}
+          </button>
+        </div>
         <button className="rs-btn rs-btn-primary" onClick={exportAll} disabled={!data || !participants.length}>
           ⬇ {en ? "Export CSV (3 files)" : "Выгрузить CSV (3 файла)"}
         </button>

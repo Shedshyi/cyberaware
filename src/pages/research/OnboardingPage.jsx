@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../auth/AuthContext";
 import { useLanguage } from "../../i18n/LanguageContext";
-import { getProfile, saveOnboarding, saveProfile } from "../../lib/store";
+import { assignCohort, getProfile, logEvent, saveOnboarding, saveProfile } from "../../lib/store";
 import "../../research/research.css";
 
 const OCCUPATIONS = [
@@ -81,6 +81,8 @@ export default function OnboardingPage() {
       setError(res.error?.message || (en ? "Could not save. Try again." : "Не удалось сохранить. Попробуй ещё раз."));
       return;
     }
+    const cohort = await assignCohort();
+    if (cohort) logEvent("cohort_assigned", { cohort });
     await saveProfile({ name: name.trim(), color: local?.color || "#6366f1", joined: profile?.created_at || new Date().toISOString() });
     await refreshProfile();
     navigate("/research/pre", { replace: true });

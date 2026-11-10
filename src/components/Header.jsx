@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/AuthContext";
 import { getProfile, getTestResults } from "../lib/store";
+import { useExperience } from "../research/experience";
 import "./header.css";
 
 const TOTAL_TESTS = 10;
@@ -105,6 +106,7 @@ export default function Header() {
   const { t, lang, setLang } = useLanguage();
   const { enabled, user, loading, profile: remote } = useAuth();
   const en = lang === "en";
+  const { features } = useExperience();
 
   const [profile, setProfile] = useState(() => getProfile());
   const [done, setDone]       = useState(() => Object.keys(getTestResults()).length);
@@ -121,7 +123,7 @@ export default function Header() {
     { to: "/tests",     label: t("nav.tests")     },
     { to: "/fun",       label: t("nav.trainers")  },
     { to: "/analytics", label: t("nav.analytics") },
-  ];
+  ].filter(n => n.to !== "/fun" || features.trainers);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);

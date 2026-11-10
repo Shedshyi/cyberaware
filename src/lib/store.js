@@ -8,12 +8,15 @@ const KEYS = {
   results: "testResults",
   lessons: "lessonRead",
   profile: "userProfile",
+  interactions: "interactions",   // журнал обучающих ответов — вход нечёткой модели
 };
+
+const MAX_LOCAL_INTERACTIONS = 1000;
 
 // Ключи, относящиеся к конкретному человеку: чистятся при выходе из аккаунта,
 // чтобы на общем компьютере (например, в компьютерном классе) следующий участник
 // не видел чужой прогресс.
-const PERSONAL_KEYS = [KEYS.results, KEYS.lessons, KEYS.profile, "hgHiScore", "phishingRounds", "snCorrect"];
+const PERSONAL_KEYS = [KEYS.results, KEYS.lessons, KEYS.profile, KEYS.interactions, "gameState", "hgHiScore", "phishingRounds", "snCorrect"];
 
 let currentUserId = null;
 export function setCurrentUser(id) { currentUserId = id; }
@@ -31,10 +34,21 @@ function warn(where, error) {
   if (error) console.warn(`[store] ${where}:`, error.message || error);
 }
 
+/** Сообщает интерфейсу, что локальные данные изменились (шапка, карточки обновятся без опроса). */
+export const STORE_EVENT = "cyberaware:store";
+export function notifyStore(detail = {}) {
+  try { window.dispatchEvent(new CustomEvent(STORE_EVENT, { detail })); } catch { /* SSR / тесты */ }
+}
+
+// Колонка ещё не создана миграцией → повторяем запрос без новых полей,
+// чтобы сайт работал и до применения 003_adaptive.sql.
+const isMissingColumn = (e) => e && (e.code === "42703" || e.code === "PGRST204" || /column/i.test(e.message || ""));
+
 // ── Чтение (синхронно, из кэша) ──────────────────────────────
 export const getTestResults = () => readJSON(KEYS.results, {});
 export const getLessonRead  = () => readJSON(KEYS.lessons, {});
 export const getProfile     = () => readJSON(KEYS.profile, null);
+export const getInteractions = () => readJSON(KEYS.interactions, []);
 
 // ── События ──────────────────────────────────────────────────
 export async function logEvent(type, payload = {}) {
@@ -80,17 +94,70 @@ export async function saveTestResult({ testId, score, total, answers = [], durat
   if (error) { warn("saveTestResult", error); return { ok: false, error }; }
 
   if (answers.length) {
-    const rows = answers.map(a => ({
+    const base = a => ({
       attempt_id: attempt.id,
       user_id: currentUserId,
       question_id: a.questionId,
       selected: a.selected ?? null,
       is_correct: a.isCorrect,
-    }));
-    const { error: aErr } = await supabase.from("answers").insert(rows);
+    });
+    const rich = a => ({
+      ...base(a),
+      response_ms: Number.isFinite(a.responseMs) ? Math.round(a.responseMs) : null,
+      hint_used: !!a.hintUsed,
+      difficulty: a.difficulty ?? null,
+    });
+    let { error: aErr } = await supabase.from("answers").insert(answers.map(rich));
+    if (isMissingColumn(aErr)) ({ error: aErr } = await supabase.from("answers").insert(answers.map(base)));
     warn("saveTestResult/answers", aErr);
   }
   return { ok: true };
+}
+
+// ── Обучающие взаимодействия (вход нечёткой модели) ──────────
+/**
+ * Один ответ в обучении: вопрос практического теста, раунд тренажёра и т.п.
+ * Входной и итоговый тест сюда НЕ пишутся — это чистое измерение.
+ * @param {{source:string, topic?:string, itemId:string|number, correct:boolean,
+ *          responseMs?:number, hintUsed?:boolean, difficulty?:1|2|3}} r
+ */
+export async function logInteraction(r) {
+  const row = {
+    source: r.source,
+    topic: r.topic ?? null,
+    itemId: String(r.itemId),
+    correct: !!r.correct,
+    responseMs: Number.isFinite(r.responseMs) ? Math.round(r.responseMs) : null,
+    hintUsed: !!r.hintUsed,
+    difficulty: r.difficulty ?? null,
+    at: new Date().toISOString(),
+  };
+  const log = getInteractions();
+  log.push(row);
+  writeJSON(KEYS.interactions, log.slice(-MAX_LOCAL_INTERACTIONS));
+  notifyStore({ type: "interaction", row });
+
+  if (!supabase || !currentUserId) return row;
+  const { error } = await supabase.from("interactions").insert({
+    user_id: currentUserId,
+    source: row.source,
+    topic: row.topic,
+    item_id: row.itemId,
+    correct: row.correct,
+    response_ms: row.responseMs,
+    hint_used: row.hintUsed,
+    difficulty: row.difficulty,
+  });
+  warn("logInteraction", error);
+  return row;
+}
+
+/** Назначает группу (экспериментальная / контрольная) при согласии — строго поровну, на стороне БД. */
+export async function assignCohort() {
+  if (!supabase || !currentUserId) return null;
+  const { data, error } = await supabase.rpc("assign_cohort");
+  warn("assignCohort", error);
+  return error ? null : data;
 }
 
 /** Сохраняет ответы анкеты участника. */
@@ -132,7 +199,7 @@ export async function saveProfile(profile) {
 export async function hydrateFromServer(userId) {
   if (!supabase) return null;
 
-  const [profileRes, attemptsRes, lessonsRes] = await Promise.all([
+  const [profileRes, attemptsRes, lessonsRes, interRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).single(),
     supabase.from("test_attempts")
       .select("test_id, phase, score, total, created_at")
@@ -142,12 +209,24 @@ export async function hydrateFromServer(userId) {
       .select("payload, created_at")
       .eq("user_id", userId).eq("type", "lesson_open")
       .order("created_at", { ascending: true }),
+    supabase.from("interactions")
+      .select("source, topic, item_id, correct, response_ms, hint_used, difficulty, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(MAX_LOCAL_INTERACTIONS),
   ]);
   warn("hydrate/profile", profileRes.error);
   warn("hydrate/attempts", attemptsRes.error);
   warn("hydrate/lessons", lessonsRes.error);
 
   const remote = profileRes.data;
+
+  if (interRes.data) {
+    writeJSON(KEYS.interactions, interRes.data.map(r => ({
+      source: r.source, topic: r.topic, itemId: r.item_id, correct: r.correct,
+      responseMs: r.response_ms, hintUsed: r.hint_used, difficulty: r.difficulty, at: r.created_at,
+    })));
+  }
 
   // Последняя попытка по каждому тесту — так же, как работал локальный режим
   const research = { pre: null, post: null };
@@ -183,6 +262,7 @@ export async function hydrateFromServer(userId) {
       else localStorage.removeItem(KEYS.profile);
     }
   }
+  notifyStore({ type: "hydrate" });
   return { profile: remote, research };
 }
 
@@ -190,4 +270,5 @@ export function clearPersonalData() {
   for (const k of PERSONAL_KEYS) {
     try { localStorage.removeItem(k); } catch { /* ignore */ }
   }
+  notifyStore({ type: "clear" });
 }
