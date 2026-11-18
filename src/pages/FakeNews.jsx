@@ -2,6 +2,8 @@ import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { logInteraction } from "../lib/store";
+import { useTrainerLog } from "../adaptive/useTrainerLog";
 
 const ALL_NEWS_RU = [
   { text: "Google официально покупает Казахстан за 10 миллиардов тенге", source: "news-info-kz.ru", isFake: true, explanation: "Государства не продаются компаниям. Кроме того, домен 'news-info-kz.ru' — не официальный казахстанский СМИ. Признаки фейка: абсурдное содержание + ненадёжный источник." },
@@ -46,17 +48,19 @@ export default function FakeNews() {
   const [finished, setFinished] = useState(false);
 
   const current = queue[index];
+  const log = useTrainerLog("fake_news");
 
   const handleAnswer = useCallback((userSaysFake) => {
     if (answered !== null) return;
     const correct = userSaysFake === current.isFake;
+    logInteraction({ source: "trainer:fake_news", topic: "basics", itemId: `news.${ALL_NEWS.indexOf(current)}`, correct, responseMs: log.elapsed(), difficulty: 2 });
     setAnswered({ correct, userSaysFake });
     if (correct) setScore((s) => s + 1);
   }, [answered, current]);
 
   const handleNext = () => {
     if (index + 1 >= TOTAL_ROUNDS) setFinished(true);
-    else { setIndex((i) => i + 1); setAnswered(null); }
+    else { setIndex((i) => i + 1); setAnswered(null); log.mark(); }
   };
 
   const handleRestart = () => {

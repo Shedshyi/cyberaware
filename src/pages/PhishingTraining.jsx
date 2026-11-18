@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { generatePhishingSMS } from "../data/phishingGenerator";
 import { useLanguage } from "../i18n/LanguageContext";
+import { logInteraction } from "../lib/store";
+import { useTrainerLog } from "../adaptive/useTrainerLog";
 
 export default function PhishingTraining() {
   const { lang } = useLanguage();
@@ -12,6 +14,11 @@ export default function PhishingTraining() {
 
   const totalTraps = smsData.traps.length;
   const foundAll   = clicked.length === totalTraps;
+  const log = useTrainerLog("phishing_sms");
+  const check = () => {
+    setChecked(true);
+    logInteraction({ source: "trainer:phishing_sms", topic: "phishing", itemId: `sms.${smsData.traps.map(t => t.id ?? t).join("+")}`.slice(0, 80), correct: foundAll, responseMs: log.elapsed(), difficulty: 2 });
+  };
 
   const handleTrapClick = (line) => {
     if (checked || clicked.includes(line)) return;
@@ -22,6 +29,7 @@ export default function PhishingTraining() {
     setSmsData(generatePhishingSMS());
     setClicked([]);
     setChecked(false);
+    log.mark();
   };
 
   const progressMsg = foundAll && !checked
@@ -116,7 +124,7 @@ export default function PhishingTraining() {
 
         <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
           {!checked && (
-            <button className="t-btn t-btn-primary" style={{ flex: 1 }} onClick={() => setChecked(true)}>
+            <button className="t-btn t-btn-primary" style={{ flex: 1 }} onClick={check}>
               {lang === "en" ? "Check" : "Проверить"}
             </button>
           )}

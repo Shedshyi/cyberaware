@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { logInteraction } from "../lib/store";
+import { useTrainerLog } from "../adaptive/useTrainerLog";
 
 const ALL_ITEMS_RU = [
   { id: 1, text: "Паспортные данные",      critical: true,  why: "Используется для кражи личности и мошенничества с документами." },
@@ -31,6 +33,7 @@ const ALL_ITEMS_EN = [
 
 export default function DataStoringPage() {
   const { lang } = useLanguage();
+  const log = useTrainerLog("data_sort");
   const ALL_ITEMS = lang === "en" ? ALL_ITEMS_EN : ALL_ITEMS_RU;
 
   const [items, setItems]             = useState(ALL_ITEMS);
@@ -56,6 +59,8 @@ export default function DataStoringPage() {
     e.preventDefault();
     setDragOver(null);
     const item = JSON.parse(e.dataTransfer.getData("item"));
+    logInteraction({ source: "trainer:data_sort", topic: "privacy", itemId: `data.${item.id}`, correct: (zone === "critical") === !!item.critical, responseMs: log.elapsed(), difficulty: 1 });
+    log.mark();
     setItems((prev) => prev.filter((i) => i.id !== item.id));
     if (zone === "critical") setCriticalBox((prev) => [...prev, item]);
     else setSafeBox((prev) => [...prev, item]);

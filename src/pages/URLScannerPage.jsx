@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { logInteraction } from "../lib/store";
+import { useTrainerLog } from "../adaptive/useTrainerLog";
 
 const URL_CASES_RU = [
   {
@@ -124,6 +126,7 @@ export default function URLScannerPage() {
   const current  = urlCases[caseIdx];
   const traps    = current.parts.filter((p) => p.suspicious);
   const foundAll = traps.every((p) => clicked.includes(p.text));
+  const log = useTrainerLog("url_scanner");
 
   const handlePartClick = (part) => {
     if (!part.suspicious || clicked.includes(part.text) || revealed) return;
@@ -134,6 +137,7 @@ export default function URLScannerPage() {
     const found   = traps.filter((t) => clicked.includes(t.text)).length;
     const trapLen = traps.length;
     setScore((s) => s + Math.round((found / trapLen) * 2));
+    logInteraction({ source: "trainer:url_scanner", topic: "phishing", itemId: `url.${current.id}`, correct: found === trapLen, responseMs: log.elapsed(), difficulty: trapLen >= 3 ? 3 : 2 });
     setRevealed(true);
   };
 

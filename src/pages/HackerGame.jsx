@@ -9,6 +9,7 @@ import { buildLearnerModel, trainerParams } from "../adaptive/learner";
 import { logModelSnapshot } from "../adaptive/snapshot";
 import { adaptiveText } from "../adaptive/messages";
 import { record } from "../game/game";
+import { useTrainerLog } from "../adaptive/useTrainerLog";
 import { getInteractions, getLessonRead, getPreTopics, getTestResults } from "../lib/store";
 
 // ── Threat data (RU) ─────────────────────────────────────────────────────────
@@ -424,6 +425,7 @@ function saveHiScore(s) {
 export default function HackerGame() {
   const { lang } = useLanguage();
   const { features } = useExperience();
+  useTrainerLog("hacker_game");
   const [params, setParams] = useState(() => gameParams(features.adaptive));
   const GAME_SIZE = params.rounds;     // локально перекрывают значения по умолчанию
   const TIMER_SEC = params.timerSec;

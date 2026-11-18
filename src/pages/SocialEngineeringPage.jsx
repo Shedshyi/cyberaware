@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
+import { logInteraction } from "../lib/store";
+import { useTrainerLog } from "../adaptive/useTrainerLog";
 
 const SCENARIOS_RU = [
   {
@@ -163,16 +165,19 @@ export default function SocialEngineeringPage() {
   const [finished, setFinished] = useState(false);
 
   const current = scenarios[idx];
+  const log = useTrainerLog("social_engineering");
 
   const handleSelect = (optIdx) => {
     if (selected !== null) return;
     setSelected(optIdx);
     setScore((s) => s + current.options[optIdx].score);
+    const best = Math.max(...current.options.map(o => o.score));
+    logInteraction({ source: "trainer:social_engineering", topic: "phishing", itemId: `scenario.${current.id}`, correct: current.options[optIdx].score === best, responseMs: log.elapsed(), difficulty: 2 });
   };
 
   const handleNext = () => {
     if (idx + 1 >= scenarios.length) setFinished(true);
-    else { setIdx((i) => i + 1); setSelected(null); }
+    else { setIdx((i) => i + 1); setSelected(null); log.mark(); }
   };
 
   const handleRestart = () => {
