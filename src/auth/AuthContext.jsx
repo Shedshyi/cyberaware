@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { supabase, backendEnabled } from "../lib/supabase";
 import { setCurrentUser, hydrateFromServer, clearPersonalData } from "../lib/store";
+import { hydrateGame } from "../game/game";
 
 const AuthContext = createContext({
   enabled: false, loading: false, user: null, profile: null, research: { pre: null, post: null },
@@ -20,6 +21,7 @@ export function AuthProvider({ children }) {
     setCurrentUser(u?.id ?? null);
     if (u) {
       const h = await hydrateFromServer(u.id);
+      await hydrateGame(u.id);
       setProfile(h?.profile ?? null);
       setResearch(h?.research ?? { pre: null, post: null });
     } else {

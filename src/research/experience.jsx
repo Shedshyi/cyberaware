@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo, useState, useCallback } from "react";
+import React, { createContext, useContext, useMemo, useState, useCallback, useEffect } from "react";
+import { setGameEnabled } from "../game/game";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { RESEARCH } from "./config";
@@ -51,6 +52,10 @@ export function ExperienceProvider({ children }) {
     }
     return { mode, cohort, researcher, features: FEATURES[mode], preview, setPreview };
   }, [enabled, user, profile, preview, setPreview]);
+
+  // Геймификация пишет опыт и награды только там, где она включена
+  setGameEnabled(value.features.gamification);
+  useEffect(() => { setGameEnabled(value.features.gamification); }, [value.features.gamification]);
 
   return <ExperienceContext.Provider value={value}>{children}</ExperienceContext.Provider>;
 }

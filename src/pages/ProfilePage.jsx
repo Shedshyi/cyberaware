@@ -8,6 +8,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useExperience } from "../research/experience";
 import NextStepCard from "../components/NextStepCard";
 import LearnerPanel from "../components/LearnerPanel";
+import CareerCard from "../components/CareerCard";
 import { getProfile, getTestResults, saveProfile } from "../lib/store";
 import { RESEARCH } from "../research/config";
 import "../research/research.css";
@@ -23,18 +24,6 @@ const AVATAR_COLORS = [
   { id: "orange", value: "#f97316" },
 ];
 
-function getBadges(lang) {
-  return [
-    { id: "first_test",     icon: "🏁", title: lang === "en" ? "First Step"       : "Первый шаг",     desc: lang === "en" ? "Complete your first test"         : "Пройди первый тест",        check: (r) => Object.keys(r).length >= 1 },
-    { id: "five_tests",     icon: "⭐", title: lang === "en" ? "Halfway There"    : "На полпути",     desc: lang === "en" ? "Complete 5 tests"                 : "Пройди 5 тестов",           check: (r) => Object.keys(r).length >= 5 },
-    { id: "all_tests",      icon: "🏆", title: lang === "en" ? "Full Course"      : "Полный курс",    desc: lang === "en" ? "All 10 tests completed"           : "Все 10 тестов пройдены",    check: (r) => Object.keys(r).length >= 10 },
-    { id: "perfect_score",  icon: "💯", title: lang === "en" ? "Perfectionist"   : "Перфекционист",  desc: lang === "en" ? "100% on any test"                 : "100% в любом тесте",        check: (r) => Object.values(r).some((t) => t.score === t.total) },
-    { id: "avg_90",         icon: "💎", title: lang === "en" ? "Expert"          : "Эксперт",        desc: lang === "en" ? "Average score above 90%"          : "Средний балл выше 90%",     check: (r) => { const v = Object.values(r); return v.length > 0 && v.reduce((s, t) => s + t.score / t.total, 0) / v.length >= 0.9; } },
-    { id: "all_green",      icon: "🛡️", title: lang === "en" ? "Cyber Defender"  : "Киберзащитник",  desc: lang === "en" ? "All tests ≥ 75%"                  : "Все тесты ≥ 75%",           check: (r) => { const v = Object.values(r); return v.length >= 10 && v.every((t) => t.score / t.total >= 0.75); } },
-    { id: "password_master",icon: "🔐", title: lang === "en" ? "Password Master" : "Мастер паролей", desc: lang === "en" ? "Passwords test at 100%"           : "Тест «Пароли» на 100%",     check: (r) => r["2"] && r["2"].score === r["2"].total },
-    { id: "anti_phishing",  icon: "🎣", title: lang === "en" ? "Anti-Phisher"    : "Антифишер",      desc: lang === "en" ? "Phishing test at 100%"            : "Тест «Фишинг» на 100%",     check: (r) => r["3"] && r["3"].score === r["3"].total },
-  ];
-}
 
 const loadProfile = getProfile;
 const loadResults = getTestResults;
@@ -233,7 +222,6 @@ export default function ProfilePage() {
   const { user, loading } = useAuth();
   const { features } = useExperience();
   const lessons = lang === "en" ? lessonsEN : lessonsRU;
-  const BADGES = getBadges(lang);
 
   const TEST_NAMES = Object.fromEntries(
     lessons.map((l, idx) => [String(idx + 1), l.title.replace(/^\S+\s/, "")])
@@ -260,7 +248,6 @@ export default function ProfilePage() {
   const allScores   = Object.values(results);
   const avgPct      = allScores.length ? Math.round(allScores.reduce((s, t) => s + (t.score / t.total) * 100, 0) / allScores.length) : 0;
   const bestPct     = allScores.length ? Math.round(Math.max(...allScores.map((t) => (t.score / t.total) * 100))) : 0;
-  const earnedBadges = BADGES.filter((b) => b.check(results));
   const allPassed   = passed >= 10 && allScores.every(t => t.score / t.total >= 0.75);
 
   const activity = Object.entries(results)
@@ -312,7 +299,6 @@ export default function ProfilePage() {
               { value: passed,                               label: lang === "en" ? "tests completed" : "тестов пройдено" },
               { value: passed ? `${avgPct}%` : "—",         label: lang === "en" ? "avg score"       : "средний балл" },
               { value: passed ? `${bestPct}%` : "—",        label: lang === "en" ? "best result"     : "лучший результат" },
-              ...(features.gamification ? [{ value: earnedBadges.length, label: lang === "en" ? "badges" : "бейджей" }] : []),
             ].map((s) => (
               <div className="profile-hero-stat" key={s.label}>
                 <span className="profile-hero-stat-value">{s.value}</span>
@@ -346,28 +332,7 @@ export default function ProfilePage() {
           </motion.div>
         )}
 
-        {features.gamification && <motion.div className="profile-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.45 }}>
-          <p className="profile-section-title">
-            🏅 {lang === "en" ? "Achievements" : "Достижения"} · {earnedBadges.length}/{BADGES.length}
-          </p>
-          <div className="profile-badges">
-            {BADGES.map((b) => {
-              const earned = b.check(results);
-              return (
-                <div key={b.id} className={`profile-badge ${earned ? "earned" : "locked"}`}>
-                  <span className="profile-badge-icon">{b.icon}</span>
-                  <p className="profile-badge-title">{b.title}</p>
-                  <p className="profile-badge-desc">{b.desc}</p>
-                  {earned && (
-                    <span style={{ fontSize: 10, color: "#10b981", fontWeight: 700, marginTop: 4, display: "block" }}>
-                      {lang === "en" ? "EARNED" : "ПОЛУЧЕНО"}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>}
+        <CareerCard />
 
         <motion.div className="profile-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.45 }}>
           <p className="profile-section-title">📊 {lang === "en" ? "Progress by test" : "Прогресс по тестам"}</p>

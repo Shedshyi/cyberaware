@@ -8,6 +8,7 @@ import { useExperience } from "../research/experience";
 import { buildLearnerModel, trainerParams } from "../adaptive/learner";
 import { logModelSnapshot } from "../adaptive/snapshot";
 import { adaptiveText } from "../adaptive/messages";
+import { record } from "../game/game";
 import { getInteractions, getLessonRead, getPreTopics, getTestResults } from "../lib/store";
 
 // ── Threat data (RU) ─────────────────────────────────────────────────────────
@@ -518,6 +519,7 @@ export default function HackerGame() {
           adaptive: params.adaptive, level: params.level, profile: params.profile,
         });
         if (params.adaptive) logModelSnapshot("hacker_game");
+        record({ type: "game_finish", correct: correct + (isCorrect ? 1 : 0), total: nextIdx });
         setPhase("finished");
       } else {
         setIdx(nextIdx);

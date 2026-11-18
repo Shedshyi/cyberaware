@@ -11,6 +11,7 @@ import { diffLevel } from "../adaptive/items";
 import NextStepCard from "../components/NextStepCard";
 import { useExperience } from "../research/experience";
 import { logModelSnapshot } from "../adaptive/snapshot";
+import { record } from "../game/game";
 
 const TIMER_SEC = 180;
 
@@ -77,6 +78,7 @@ function TestPage() {
       });
     }
     if (features.adaptive) logModelSnapshot(`practice_test_${id}`);
+    record({ type: "practice_test", topic, score: s, total: questions.length, hints: rows.filter(r => r.hintUsed).length });
   };
 
   useEffect(() => {

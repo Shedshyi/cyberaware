@@ -26,7 +26,8 @@ import AssessmentPage from "./pages/research/AssessmentPage";
 import ResearchDashboard from "./pages/research/ResearchDashboard";
 import ResearchGate from "./research/ResearchGate";
 import ScrollToTop from "./components/ScrollToTop";
-import { ExperienceProvider, RequireFeature } from "./research/experience";
+import { ExperienceProvider, RequireFeature, IfFeature } from "./research/experience";
+import GameToasts from "./components/GameToasts";
 import NotFound from "./pages/NotFound";
 import './styles.css';
 import './mobile.css'; // после styles.css — переопределяет его правила
@@ -67,6 +68,7 @@ function App() {
           </Routes>
         </main>
         <FooterBar />
+        <IfFeature feature="gamification"><GameToasts /></IfFeature>
       </div>
     </Router>
     </ExperienceProvider>

@@ -5,6 +5,10 @@ import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getLessonRead, markLessonOpened } from "../lib/store";
+import { record } from "../game/game";
+import { useExperience } from "../research/experience";
+import { MISSION_BRIEF } from "../game/content";
+import "../game/game.css";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 28 },
@@ -18,13 +22,17 @@ const loadRead = getLessonRead;
 export default function LessonPage() {
   const { id } = useParams();
   const { t, lang } = useLanguage();
+  const { features } = useExperience();
   const lessons = lang === "en" ? lessonsEN : lessonsRU;
 
   const lesson = lessons.find(l => l.id === id);
   const [alreadyRead] = useState(() => !!loadRead()[id]);
 
   useEffect(() => {
-    if (lessons.some(l => l.id === id)) markLessonOpened(id);
+    if (lessons.some(l => l.id === id)) {
+      const firstTime = markLessonOpened(id);
+      record({ type: "lesson_open", topic: id, firstTime });
+    }
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!lesson) return <Navigate to="/lessons" replace />;
@@ -34,6 +42,16 @@ export default function LessonPage() {
 
   return (
     <div className="lp-root">
+
+      {features.gamification && MISSION_BRIEF[lang]?.[id] && (
+        <div className="mission-brief">
+          <span aria-hidden="true" style={{ fontSize: 22 }}>🛰️</span>
+          <div>
+            <b>{lang === "en" ? `Mission ${idx + 1}` : `Миссия ${idx + 1}`}</b>
+            <p>{MISSION_BRIEF[lang][id]}</p>
+          </div>
+        </div>
+      )}
 
       {/* ── HERO ── */}
       <motion.div

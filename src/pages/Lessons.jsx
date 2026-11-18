@@ -5,6 +5,12 @@ import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
 import NextStepCard from "../components/NextStepCard";
+import { useExperience } from "../research/experience";
+import { useGame } from "../game/useGame";
+import { useLearner } from "../adaptive/useLearner";
+import { medal } from "../game/engine";
+import { MEDAL, MEDAL_ICON } from "../game/content";
+import "../game/game.css";
 
 function loadResults() {
   try { return JSON.parse(localStorage.getItem("testResults")) || {}; } catch { return {}; }
@@ -17,6 +23,9 @@ const ICONS = ["🧭","🔐","🎣","📱","🦠","📡","🔄","🕵️","🚨"
 
 export default function Lessons() {
   const { t, lang } = useLanguage();
+  const { features } = useExperience();
+  const game = useGame();
+  const { model } = useLearner();
   const lessons = lang === "en" ? lessonsEN : lessonsRU;
 
   const [results] = useState(() => loadResults());
@@ -97,6 +106,10 @@ export default function Lessons() {
 
               {/* Meta pills */}
               <div className="ls-card-meta">
+                {features.gamification && (() => {
+                  const m = medal(game.state, lesson.id, { lessonRead: !!read[lesson.id], topicLevel: model.topics[lesson.id]?.level });
+                  return m ? <span className={`ls-medal ls-medal-${m}`}>{MEDAL_ICON[m]} {MEDAL[lang][m]}</span> : null;
+                })()}
                 {lesson.concepts && (
                   <span className="ls-meta-pill">{lesson.concepts.length} {lang === "en" ? "concepts" : "понятия"}</span>
                 )}

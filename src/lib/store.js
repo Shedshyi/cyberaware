@@ -189,6 +189,7 @@ export function markLessonOpened(lessonId) {
     writeJSON(KEYS.lessons, prev);
   }
   logEvent("lesson_open", { lessonId, firstTime });
+  return firstTime;
 }
 
 // ── Профиль ──────────────────────────────────────────────────

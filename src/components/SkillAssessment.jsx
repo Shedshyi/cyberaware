@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { assess as fuzzyAssess } from "../adaptive/fuzzy";
 import { logEvent, logInteraction } from "../lib/store";
+import { record } from "../game/game";
 
 const DIFF_NUM = { Easy: 1, Medium: 2, Hard: 3 };
 
@@ -109,6 +110,7 @@ export default function SkillAssessment() {
         logEvent("model_assessment", { context: "skill_check", level: res.skill_level, profile: res.behavior_profile,
           S: res.raw_score, C: res.confidence, S_adj: res.adjusted_score, rules: res.rules.map(x => x.id),
           signals: Object.fromEntries(Object.entries(res.signals).map(([k, v]) => [k, +v.toFixed(2)])) });
+        record({ type: "skill_check" });
         setResult(res); setPhase("result");
       }
       else { setQIdx(i=>i+1); setAnswered(null); setHintOn(false); setHintUsed(false); setElapsed(0); }
