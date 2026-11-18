@@ -27,6 +27,10 @@ npm run deploy     # публикация на GitHub Pages
 5. Скопируй `.env.example` в `.env.local` и вставь Project URL и anon key (Project Settings → API).
 6. После первого входа сделай себя исследователем (SQL в конце `schema.sql`).
 
+## Документация
+- `docs/adaptivity-gamification.md` — дизайн эксперимента, нечёткая модель, адаптивность, геймификация, сбор данных (для диссертации)
+- `docs/sources.md` — источники фактов в уроках и тестах
+
 ## Данные
 | Таблица | Что хранит |
 |---|---|
