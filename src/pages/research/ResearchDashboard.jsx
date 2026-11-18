@@ -5,18 +5,35 @@ import { useLanguage } from "../../i18n/LanguageContext";
 import { TOPICS } from "../../research/assessmentData";
 import {
   loadResearchData, buildParticipants, buildTopicStats,
-  buildAnswersLong, buildEventsLong, downloadCSV,
+  buildAnswersLong, buildEventsLong, buildInteractionsLong, downloadCSV,
 } from "../../research/researchData";
 import { mean, sd, pairedTTest, welchTTest, fmt, fmtP } from "../../research/stats";
 import "../../research/research.css";
 import { useExperience } from "../../research/experience";
+
+// Вовлечённость: [поле, подпись RU, подпись EN]
+const ENGAGEMENT = [
+  ["active_days", "Активных дней", "Active days"],
+  ["lessons_opened", "Открыто уроков", "Lessons opened"],
+  ["practice_attempts", "Попыток практических тестов", "Practice test attempts"],
+  ["interactions_n", "Обучающих ответов", "Learning answers"],
+  ["median_response_sec", "Медиана времени ответа, с", "Median response time, s"],
+  ["hints_used", "Подсказок", "Hints used"],
+  ["recs_shown", "Показано рекомендаций", "Recommendations shown"],
+  ["recs_clicked", "Переходов по рекомендациям", "Recommendations followed"],
+  ["xp_total", "Опыт", "XP"],
+  ["badges", "Наград", "Badges"],
+];
 
 // Колонки CSV участников: без имени и uuid — только псевдонимизированный код.
 const PARTICIPANT_COLUMNS = [
   "code", "cohort", "age", "occupation", "study_group", "prior_training", "self_rating",
   "pre_score", "pre_pct", "pre_duration_sec", "post_score", "post_pct", "post_duration_sec", "gain_pct",
   "practice_tests_done", "practice_attempts", "practice_avg_pct", "lessons_opened", "games_played",
-  "days_pre_to_post", "registered_at",
+  "days_pre_to_post", "active_days", "interactions_n", "interactions_correct_pct", "hints_used",
+  "median_response_sec", "recs_shown", "recs_clicked", "adaptations", "model_level_last",
+  "model_profile_last", "model_S_adj_last", "xp_total", "badges", "rank_ups", "daily_goals_met",
+  "max_streak", "registered_at", "cohort_assigned_at",
 ];
 
 function CohortPill({ cohort, en }) {
@@ -92,6 +109,7 @@ export default function ResearchDashboard() {
     downloadCSV(`participants${suffix}.csv`, participants, PARTICIPANT_COLUMNS);
     downloadCSV(`answers_pre_post${suffix}.csv`, buildAnswersLong(data.answers, participants));
     downloadCSV(`events${suffix}.csv`, buildEventsLong(data.events, participants));
+    downloadCSV(`interactions${suffix}.csv`, buildInteractionsLong(data.interactions, participants));
   };
 
   return (
@@ -114,7 +132,7 @@ export default function ResearchDashboard() {
           </button>
         </div>
         <button className="rs-btn rs-btn-primary" onClick={exportAll} disabled={!data || !participants.length}>
-          ⬇ {en ? "Export CSV (3 files)" : "Выгрузить CSV (3 файла)"}
+          ⬇ {en ? "Export CSV (4 files)" : "Выгрузить CSV (4 файла)"}
         </button>
       </div>
 
@@ -167,6 +185,35 @@ export default function ResearchDashboard() {
                 ? "Use these as a preview; run the final analysis on the exported CSV."
                 : "Это предварительный расчёт: финальный анализ делай по выгруженному CSV."}
             </p>
+          </div>
+
+          <div className="rs-card">
+            <h3>{en ? "Engagement by group (means)" : "Вовлечённость по группам (средние)"}</h3>
+            <div className="rs-table-wrap">
+              <table className="rs-table">
+                <thead>
+                  <tr>
+                    <th>{en ? "Metric" : "Показатель"}</th>
+                    <th className="num">{en ? "Experimental" : "Эксперим."}</th>
+                    <th className="num">{en ? "Control" : "Контроль"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ENGAGEMENT.map(([key, ru, enLabel]) => (
+                    <tr key={key}>
+                      <td>{en ? enLabel : ru}</td>
+                      {["experimental", "control"].map(c => {
+                        const vals = participants.filter(p => p.cohort === c).map(p => p[key]).filter(Number.isFinite);
+                        return <td key={c} className="num">{vals.length ? `${fmt(mean(vals), 1)} (${fmt(sd(vals), 1)})` : "—"}</td>;
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="rs-note">{en
+              ? "Mean (SD) over all consented participants of the group. Recommendations, XP and badges exist only in the experimental group by design."
+              : "Среднее (SD) по всем участникам группы с согласием. Рекомендации, опыт и награды по дизайну есть только у экспериментальной группы."}</p>
           </div>
 
           <div className="rs-card">
