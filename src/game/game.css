@@ -31,7 +31,7 @@
 .cc-today-title { margin: 0; font-size: 14px; font-weight: 700; }
 .cc-today-sub { margin: 2px 0 0; font-size: 13px; color: #4b5563; }
 .cc-section { margin: 22px 0 10px; font-size: 14px; font-weight: 700; }
-.cc-missions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cc-missions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .cc-mission { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border-radius: 12px; border: 1px solid #eef0f6; text-decoration: none; color: inherit; font-size: 14px; transition: border-color .15s, background .15s; }
 .cc-mission:hover { border-color: #c7d2fe; background: #fafaff; }
 .cc-mission-num { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: #f3f4f6; font-size: 12px; font-weight: 800; color: #6b7280; }
@@ -51,7 +51,7 @@
 .cc-team { margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; background: #ecfdf5; color: #065f46; font-size: 14px; }
 @media (max-width: 700px) {
   .cc-top { grid-template-columns: 1fr; }
-  .cc-missions { grid-template-columns: 1fr; }
+  .cc-missions { grid-template-columns: minmax(0, 1fr); }
   .cc-badges { grid-template-columns: 1fr 1fr; }
   .cc-card { padding: 18px; }
 }

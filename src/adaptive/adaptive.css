@@ -53,10 +53,10 @@ html[data-theme="dark"] .ns-reason span { color: #cbd5e1; }
 .lp-lv-adv { background: #d1fae5; color: #065f46; }
 .lpn-chip-profile { background: #f3f4f6; color: #374151; }
 .lpn-chip-none { background: #f9fafb; color: #9ca3af; font-weight: 600; }
-.lpn-topics { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
-.lpn-topic { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 36px; border-bottom: 1px solid #f3f4f6; font-size: 14px; color: #374151; }
+.lpn-topics { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 20px; }
+.lpn-topic { min-width: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 36px; border-bottom: 1px solid #f3f4f6; font-size: 14px; color: #374151; }
 .lpn-topic-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 600px) { .lpn-topics { grid-template-columns: 1fr; } .lpn-card { padding: 18px; } }
+@media (max-width: 600px) { .lpn-topics { grid-template-columns: minmax(0, 1fr); } .lpn-card { padding: 18px; } }
 html[data-theme="dark"] .lpn-card { background: #1a1d27; border-color: #2a2f3d; }
 html[data-theme="dark"] .lpn-title { color: #e2e8f0; }
 html[data-theme="dark"] .lpn-help, html[data-theme="dark"] .lpn-topic { color: #cbd5e1; }

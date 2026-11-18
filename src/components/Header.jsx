@@ -5,6 +5,8 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/AuthContext";
 import { getProfile, getTestResults } from "../lib/store";
 import { useExperience } from "../research/experience";
+import { useGame } from "../game/useGame";
+import { RANKS } from "../game/content";
 import "./header.css";
 
 const TOTAL_TESTS = 10;
@@ -68,6 +70,9 @@ function ProgressRing({ done, total }) {
 // ── Меню аватара ─────────────────────────────────────────────
 function AccountMenu({ profile, en, onClose }) {
   const { enabled, user, profile: remote, signOut } = useAuth();
+  const { features } = useExperience();
+  const game = useGame();
+  const rank = (RANKS[en ? "en" : "ru"])[game.rank.index];
   const navigate = useNavigate();
   const isResearcher = remote?.role === "researcher";
   return (
@@ -82,6 +87,11 @@ function AccountMenu({ profile, en, onClose }) {
       <div className="nav-menu-head">
         <span className="nav-menu-name">{profile?.name || (en ? "Guest" : "Гость")}</span>
         <span className="nav-menu-sub">{user ? user.email : en ? "Progress saved in this browser" : "Прогресс хранится в браузере"}</span>
+        {features.gamification && (
+          <span className="nav-menu-rank">
+            {rank.name} · {game.state.xp} {en ? "XP" : "опыта"}{game.streak > 0 ? ` · 🔥 ${game.streak}` : ""}
+          </span>
+        )}
       </div>
       <Link to="/profile" className="nav-menu-item" role="menuitem" onClick={onClose}>{en ? "Profile" : "Профиль"}</Link>
       <Link to="/analytics" className="nav-menu-item" role="menuitem" onClick={onClose}>{en ? "My progress" : "Мой прогресс"}</Link>
