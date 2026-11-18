@@ -35,11 +35,15 @@ export function ExperienceProvider({ children }) {
     let mode = "full";
     let cohort = null;
     const researcher = profile?.role === "researcher";
-    if (RESEARCH.enabled && enabled && user && profile) {
+    if (RESEARCH.enabled && enabled && user) {
+      // Вошедший участник получает полный режим ТОЛЬКО когда точно известно, что он
+      // в экспериментальной группе. Пока профиль грузится, нет согласия или группы —
+      // урезанный режим: иначе в контрольную группу «протекают» рекомендации и опыт.
+      mode = "traditional";
       if (researcher) mode = preview === "traditional" ? "traditional" : "full";
-      else if (profile.consent && profile.cohort) {
+      else if (profile?.consent && profile.cohort) {
         cohort = profile.cohort;
-        mode = cohort === "control" ? "traditional" : "full";
+        mode = cohort === "experimental" ? "full" : "traditional";
       }
     }
     // Только в dev-сборке (npm run dev): принудительный режим для проверки без входа.

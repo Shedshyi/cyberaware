@@ -17,7 +17,7 @@ export function researchStep(profile, research) {
   return "learning";
 }
 
-export default function ResearchGate() {
+export default function ResearchGate({ children }) {
   const { enabled, loading, user, profile, research, refreshProfile } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -28,6 +28,8 @@ export default function ResearchGate() {
   useEffect(() => {
     if (!RESEARCH.enabled || !enabled || !profile || assignTried.current) return;
     if (profile.role !== "participant" || !profile.consent || profile.cohort_assigned_at) return;
+    // Анкета уже назначила группу в этой сессии — профиль просто ещё не обновился
+    try { if (sessionStorage.getItem("cohortAssigned")) return; } catch { /* ignore */ }
     assignTried.current = true;
     assignCohort().then(cohort => {
       if (cohort) { logEvent("cohort_assigned", { cohort, retry: true }); refreshProfile(); }
@@ -42,5 +44,13 @@ export default function ResearchGate() {
     else if (step === "pre") navigate("/research/pre", { replace: true });
   }, [enabled, loading, user, profile, research, pathname, navigate]);
 
-  return null;
+  // Пока участнику нужна анкета или входной тест, другие страницы не отрисовываются вовсе:
+  // иначе они успевают записать события (открытие урока и т.п.) до перенаправления.
+  if (RESEARCH.enabled && enabled && user && !ALWAYS_ALLOWED.includes(pathname)) {
+    if (loading) return null;
+    if (!profile) return children ?? null; // профиль не загрузился — страница в урезанном режиме
+    const step = researchStep(profile, research);
+    if (step === "onboarding" || step === "pre") return null;
+  }
+  return children ?? null;
 }

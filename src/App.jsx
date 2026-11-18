@@ -40,9 +40,9 @@ function App() {
     <Router>
       <div className="app-layout">
         <ScrollToTop />
-        <ResearchGate />
         <HeaderBar />
         <main className="site-content">
+          <ResearchGate>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/lessons" element={<Lessons />} />
@@ -66,6 +66,7 @@ function App() {
             <Route path="/research/:phase" element={<AssessmentPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </ResearchGate>
         </main>
         <FooterBar />
         <IfFeature feature="gamification"><GameToasts /></IfFeature>

@@ -82,7 +82,10 @@ export default function OnboardingPage() {
       return;
     }
     const cohort = await assignCohort();
-    if (cohort) logEvent("cohort_assigned", { cohort });
+    if (cohort) {
+      logEvent("cohort_assigned", { cohort });
+      try { sessionStorage.setItem("cohortAssigned", "1"); } catch { /* ignore */ }
+    }
     await saveProfile({ name: name.trim(), color: local?.color || "#6366f1", joined: profile?.created_at || new Date().toISOString() });
     await refreshProfile();
     navigate("/research/pre", { replace: true });
