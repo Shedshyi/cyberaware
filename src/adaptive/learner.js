@@ -81,7 +81,10 @@ export function nextStep(model, { now = Date.now(), postUnlocked = false, postDo
     const t = pickBy(list, x => x.profile === "Guessing") || pickBy(list, x => x.assessment);
     if (t) return { kind: "slow", topic: t.topic, to: `/test/${TEST_BY_TOPIC[t.topic]}`, reason: { key: "guessing", params: { topic: t.topic } } };
   }
-  if (global && global.profile === "Hint-Dependent") {
+  // Совет «без подсказок» имеет смысл, только когда точность хотя бы средняя (WA ≥ 0,4 — начало
+  // зоны Medium в табл. I). При почти нулевой точности HP = подсказки/верные велико даже от одной
+  // подсказки, и полезнее вернуться к материалу (шаг 2 ниже).
+  if (global && global.profile === "Hint-Dependent" && global.signals.WA >= 0.4) {
     const t = pickBy(list, x => x.profile === "Hint-Dependent") || pickBy(list, x => x.assessment);
     if (t) return { kind: "no_hints", topic: t.topic, to: `/test/${TEST_BY_TOPIC[t.topic]}`, reason: { key: "hints", params: { topic: t.topic } } };
   }

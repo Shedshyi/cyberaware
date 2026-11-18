@@ -160,3 +160,27 @@ html[data-theme="dark"] .profile-retry { background: rgba(245, 158, 11, .15); co
   .ft-root { padding: 32px 16px 24px; margin-top: 40px; }
   .ft-links { margin: 0 -8px; }
 }
+
+/* Карточка «Следующий шаг» на главной и в уроках */
+.hv2-next { padding: 32px 24px 0; background: #f9fafb; }
+.hv2-next-inner { max-width: 760px; margin: 0 auto; }
+.hv2-next .ns-card { margin: 0; }
+.ls-next { max-width: 1100px; margin: 0 auto 8px; padding: 0 4px; }
+html[data-theme="dark"] .hv2-next { background: var(--bg); }
+@media (max-width: 600px) { .hv2-next { padding: 24px 16px 0; } }
+
+/* Подсказка в практическом тесте (только экспериментальный режим) */
+.tp-hint-row { margin-top: 14px; }
+.tp-hint-btn {
+  font: inherit; font-size: 14px; font-weight: 600;
+  min-height: 40px; padding: 0 14px; border-radius: 10px;
+  border: 1.5px dashed #c7d2fe; background: transparent; color: #4f46e5; cursor: pointer;
+}
+.tp-hint-btn:hover { background: #eef2ff; }
+.tp-hint-used { font-size: 13px; color: #6b7280; }
+.tp-option-gone { opacity: .35; text-decoration: line-through; cursor: not-allowed; }
+html[data-theme="dark"] .tp-hint-btn { border-color: #3730a3; color: #a5b4fc; }
+html[data-theme="dark"] .tp-hint-btn:hover { background: #1e1b4b; }
+
+.hg-adapt-note { margin: 4px 0 0; font-size: 13px; color: #4f46e5; }
+html[data-theme="dark"] .hg-adapt-note { color: #a5b4fc; }

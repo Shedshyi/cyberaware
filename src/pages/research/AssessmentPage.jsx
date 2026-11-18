@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../auth/AuthContext";
 import { useLanguage } from "../../i18n/LanguageContext";
-import { getTestResults, saveTestResult } from "../../lib/store";
+import { getTestResults, savePreTopics, saveTestResult } from "../../lib/store";
 import { ASSESSMENT_TEST_ID, getAssessment } from "../../research/assessmentData";
 import { RESEARCH } from "../../research/config";
 import "../../research/research.css";
@@ -148,6 +148,16 @@ export default function AssessmentPage() {
       setBusy(false);
       setError(en ? "Could not save the result. Check your connection and press again." : "Не удалось сохранить результат. Проверь интернет и нажми ещё раз.");
       return;
+    }
+    if (phase === "pre") {
+      // Только сохраняем результат по темам для дальнейшей адаптивности; на сам тест это не влияет
+      const map = {};
+      questions.forEach((qq, i) => {
+        map[qq.topic] ??= { correct: 0, total: 0 };
+        map[qq.topic].total += 1;
+        map[qq.topic].correct += rows[i].isCorrect ? 1 : 0;
+      });
+      savePreTopics(map);
     }
     markAssessmentDone(phase, { score, total: questions.length, date: new Date().toISOString() });
   };

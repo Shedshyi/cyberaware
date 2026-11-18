@@ -4,6 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import { logEvent, logInteraction } from "../lib/store";
 import { DIFF_FROM_WORD } from "../adaptive/items";
+import { useExperience } from "../research/experience";
+import { buildLearnerModel, trainerParams } from "../adaptive/learner";
+import { logModelSnapshot } from "../adaptive/snapshot";
+import { adaptiveText } from "../adaptive/messages";
+import { getInteractions, getLessonRead, getPreTopics, getTestResults } from "../lib/store";
 
 // ── Threat data (RU) ─────────────────────────────────────────────────────────
 const THREATS_RU = [
@@ -256,11 +261,13 @@ const THREATS_EN = [
 ];
 
 // ── Timer hook ───────────────────────────────────────────────────────────────
-function useTimer(seconds, running, onExpire) {
+// resetKey меняется на каждом новом раунде — таймер начинает отсчёт заново
+// (раньше отсчёт продолжался с остатка прошлого раунда).
+function useTimer(seconds, running, onExpire, resetKey) {
   const [left, setLeft] = useState(seconds);
   const cb = useRef(onExpire);
   cb.current = onExpire;
-  useEffect(() => { setLeft(seconds); }, [seconds]);
+  useEffect(() => { setLeft(seconds); }, [seconds, resetKey]);
   useEffect(() => {
     if (!running) return;
     if (left <= 0) { cb.current(); return; }
@@ -379,8 +386,31 @@ const GAME_SIZE  = 8;
 const TIMER_SEC  = 12;
 const MAX_LIVES  = 3;
 
-function pickThreats(pool, n) {
-  return [...pool].sort(() => Math.random() - 0.5).slice(0, n);
+const shuffle = (xs) => [...xs].sort(() => Math.random() - 0.5);
+
+// Без адаптивности — случайные n раундов. С адаптивностью — доли лёгких/средних/сложных
+// раундов по уровню ученика (mix), остаток добирается из оставшихся.
+function pickThreats(pool, n, mix = null) {
+  if (!mix) return shuffle(pool).slice(0, n);
+  const byDiff = { 1: [], 2: [], 3: [] };
+  for (const t of shuffle(pool)) byDiff[DIFF_FROM_WORD[t.diff] ?? 2].push(t);
+  const picked = [];
+  for (const d of [1, 2, 3]) picked.push(...byDiff[d].splice(0, Math.round(mix[d] * n)));
+  const rest = shuffle([...byDiff[1], ...byDiff[2], ...byDiff[3]]);
+  while (picked.length < n && rest.length) picked.push(rest.shift());
+  return shuffle(picked.slice(0, n));
+}
+
+const DEFAULT_PARAMS = { level: null, profile: null, mix: null, timerSec: TIMER_SEC, rounds: GAME_SIZE, adaptive: false };
+
+/** Параметры новой игры: в экспериментальном режиме — по модели ученика. */
+function gameParams(adaptive) {
+  if (!adaptive) return DEFAULT_PARAMS;
+  const model = buildLearnerModel({
+    interactions: getInteractions(), testResults: getTestResults(),
+    lessonRead: getLessonRead(), preTopics: getPreTopics(),
+  });
+  return { ...trainerParams(model, "phishing"), adaptive: true };
 }
 function loadHiScore() {
   try { return parseInt(localStorage.getItem("hgHiScore") || "0", 10); } catch { return 0; }
@@ -392,6 +422,10 @@ function saveHiScore(s) {
 // ── Main component ────────────────────────────────────────────────────────────
 export default function HackerGame() {
   const { lang } = useLanguage();
+  const { features } = useExperience();
+  const [params, setParams] = useState(() => gameParams(features.adaptive));
+  const GAME_SIZE = params.rounds;     // локально перекрывают значения по умолчанию
+  const TIMER_SEC = params.timerSec;
 
   const THREATS     = lang === "en" ? THREATS_EN : THREATS_RU;
   const DIFF_LABEL  = { easy: lang === "en" ? "Easy" : "Лёгкий", medium: lang === "en" ? "Medium" : "Средний", hard: lang === "en" ? "Hard" : "Сложный" };
@@ -402,7 +436,7 @@ export default function HackerGame() {
     notif:   lang === "en" ? "🔔 Notification" : "🔔 Уведомление",
   };
 
-  const [threats,    setThreats]    = useState(() => pickThreats(THREATS, GAME_SIZE));
+  const [threats,    setThreats]    = useState(() => pickThreats(THREATS, params.rounds, params.mix));
   const [idx,        setIdx]        = useState(0);
   const [lives,      setLives]      = useState(MAX_LIVES);
   const [points,     setPoints]     = useState(0);
@@ -416,13 +450,18 @@ export default function HackerGame() {
   const [timerKey,   setTimerKey]   = useState(0);
 
   useEffect(() => {
-    setThreats(pickThreats(lang === "en" ? THREATS_EN : THREATS_RU, GAME_SIZE));
+    setThreats(pickThreats(lang === "en" ? THREATS_EN : THREATS_RU, params.rounds, params.mix));
     setIdx(0); setLives(MAX_LIVES); setPoints(0);
     setCombo(0); setMaxCombo(0); setCorrect(0);
     setFeedback(null); setShake(false);
     setTimerKey(k => k + 1); setPhase("play");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
+
+  // В журнал — какие параметры выбрала адаптивность для этой игры
+  useEffect(() => {
+    if (params.adaptive) logEvent("adaptation", { trainer: "hacker_game", level: params.level, profile: params.profile, mix: params.mix, timerSec: params.timerSec, rounds: params.rounds });
+  }, [params]);
 
   const current = threats[idx];
   const isTimerRunning = phase === "play";
@@ -431,7 +470,7 @@ export default function HackerGame() {
   const timeLeft = useTimer(TIMER_SEC, isTimerRunning, () => {
     if (phase !== "play") return;
     handleResult(false, true);
-  });
+  }, timerKey);
 
   const handleResult = useCallback((blocked, timedOut = false) => {
     if (phase !== "play") return;
@@ -476,7 +515,9 @@ export default function HackerGame() {
           rounds: nextIdx,
           livesLeft: Math.max(0, newLives),
           lang,
+          adaptive: params.adaptive, level: params.level, profile: params.profile,
         });
+        if (params.adaptive) logModelSnapshot("hacker_game");
         setPhase("finished");
       } else {
         setIdx(nextIdx);
@@ -488,7 +529,9 @@ export default function HackerGame() {
   }, [phase, current, combo, lives, idx, points, timeLeft, correct, lang]);
 
   const restart = () => {
-    setThreats(pickThreats(lang === "en" ? THREATS_EN : THREATS_RU, GAME_SIZE));
+    const next = gameParams(features.adaptive);
+    setParams(next);
+    setThreats(pickThreats(lang === "en" ? THREATS_EN : THREATS_RU, next.rounds, next.mix));
     setIdx(0); setLives(MAX_LIVES); setPoints(0);
     setCombo(0); setMaxCombo(0); setCorrect(0);
     setFeedback(null); setShake(false);
@@ -564,6 +607,13 @@ export default function HackerGame() {
         <p className="hg-subtitle">
           {lang === "en" ? "Is this phishing or safe?" : "Определи — это фишинг или нет?"}
         </p>
+        {params.adaptive && params.level && (
+          <p className="hg-adapt-note">
+            {lang === "en" ? "Tuned to your level" : "Подобрано под твой уровень"}: <b>{adaptiveText(lang).level[params.level]}</b>
+            {params.profile === "Guessing" && (lang === "en" ? ` · ${params.timerSec} s per round — no rush` : ` · ${params.timerSec} с на раунд — не спеши`)}
+            {params.profile === "Fatigued" && (lang === "en" ? ` · short session: ${params.rounds} rounds` : ` · короткая сессия: ${params.rounds} раундов`)}
+          </p>
+        )}
       </div>
 
       <div className="hg-hud">

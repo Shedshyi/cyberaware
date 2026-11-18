@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
+import NextStepCard from "../components/NextStepCard";
 
 function loadResults() {
   try { return JSON.parse(localStorage.getItem("testResults")) || {}; } catch { return {}; }
@@ -55,6 +56,8 @@ export default function Lessons() {
           </div>
         </div>
       </motion.div>
+
+      <div className="ls-next"><NextStepCard placement="lessons" /></div>
 
       {/* ── Grid ── */}
       <div className="ls-grid">

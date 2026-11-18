@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../i18n/LanguageContext";
 import SkillAssessment from "../components/SkillAssessment";
 import { useExperience } from "../research/experience";
+import NextStepCard from "../components/NextStepCard";
 
 function loadProfile() {
   try { return JSON.parse(localStorage.getItem("userProfile")); }
@@ -148,6 +149,13 @@ export default function Home() {
               {passedAll ? t("home.progress.certificate") : t("home.progress.continue")}
             </Link>
           </motion.div>
+        </section>
+      )}
+
+      {/* ── NEXT STEP (адаптивность) ── */}
+      {features.adaptive && (
+        <section className="hv2-next">
+          <div className="hv2-next-inner"><NextStepCard placement="home" /></div>
         </section>
       )}
 

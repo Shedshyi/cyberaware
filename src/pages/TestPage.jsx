@@ -8,6 +8,9 @@ import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
 import { logInteraction, saveTestResult } from "../lib/store";
 import { diffLevel } from "../adaptive/items";
+import NextStepCard from "../components/NextStepCard";
+import { useExperience } from "../research/experience";
+import { logModelSnapshot } from "../adaptive/snapshot";
 
 const TIMER_SEC = 180;
 
@@ -35,6 +38,8 @@ function TestPage() {
   const [showReview, setShowReview] = useState(false);
   const [timeLeft,   setTimeLeft]   = useState(TIMER_SEC);
   const [timedOut,   setTimedOut]   = useState(false);
+  const [eliminated, setEliminated] = useState({});   // questionId -> индекс убранного подсказкой варианта
+  const { features } = useExperience();
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
@@ -71,6 +76,7 @@ function TestPage() {
         responseMs: r.responseMs, hintUsed: r.hintUsed, difficulty: r.difficulty,
       });
     }
+    if (features.adaptive) logModelSnapshot(`practice_test_${id}`);
   };
 
   useEffect(() => {
@@ -113,6 +119,15 @@ function TestPage() {
     return              { label: lang === "en" ? "Needs work"  : "Нужна работа",         emoji: "📚", color: "#ef4444", bg: "#fee2e2" };
   }
 
+  // Подсказка убирает один неверный вариант (не выбранный сейчас). Выбор детерминирован id вопроса.
+  const takeHint = () => {
+    if (submitted || eliminated[q.id] !== undefined) return;
+    const wrong = q.options.map((_, i) => i).filter(i => i !== q.correct && i !== answers[q.id]);
+    if (!wrong.length) return;
+    hintsUsed.current[q.id] = true;
+    setEliminated(e => ({ ...e, [q.id]: wrong[q.id % wrong.length] }));
+  };
+
   const handleSelect = (optIdx) => {
     if (submitted) return;
     if (respMs.current[q.id] === undefined && shownAt.current[q.id] !== undefined) {
@@ -140,6 +155,7 @@ function TestPage() {
     setTimedOut(false);
     startedAt.current = Date.now();
     shownAt.current = {}; respMs.current = {}; hintsUsed.current = {};
+    setEliminated({});
   };
 
   const mins = Math.floor(timeLeft / 60);
@@ -210,11 +226,14 @@ function TestPage() {
               <div className="tp-options">
                 {q.options.map((opt, i) => {
                   const selected = answers[q.id] === i;
+                  const gone = eliminated[q.id] === i;
                   return (
                     <motion.button
                       key={i}
-                      className={`tp-option${selected ? " tp-option-selected" : ""}`}
-                      onClick={() => handleSelect(i)}
+                      className={`tp-option${selected ? " tp-option-selected" : ""}${gone ? " tp-option-gone" : ""}`}
+                      onClick={() => !gone && handleSelect(i)}
+                      disabled={gone}
+                      aria-disabled={gone}
                       whileHover={{ scale: 1.008 }}
                       whileTap={{ scale: 0.995 }}
                     >
@@ -227,6 +246,19 @@ function TestPage() {
                   );
                 })}
               </div>
+              {features.hints && (
+                <div className="tp-hint-row">
+                  {eliminated[q.id] === undefined ? (
+                    <button type="button" className="tp-hint-btn" onClick={takeHint}>
+                      💡 {lang === "en" ? "Hint: remove one wrong option" : "Подсказка: убрать один неверный вариант"}
+                    </button>
+                  ) : (
+                    <span className="tp-hint-used">
+                      {lang === "en" ? "Hint used — one wrong option removed" : "Подсказка использована — один неверный вариант убран"}
+                    </span>
+                  )}
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -287,6 +319,8 @@ function TestPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
+          <NextStepCard placement="test_result" compact />
+
           {/* Score card */}
           <div className="tp-result-card">
             <motion.div

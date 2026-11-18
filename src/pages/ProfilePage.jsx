@@ -6,6 +6,8 @@ import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/AuthContext";
 import { useExperience } from "../research/experience";
+import NextStepCard from "../components/NextStepCard";
+import LearnerPanel from "../components/LearnerPanel";
 import { getProfile, getTestResults, saveProfile } from "../lib/store";
 import { RESEARCH } from "../research/config";
 import "../research/research.css";
@@ -322,6 +324,8 @@ export default function ProfilePage() {
 
         <AccountCard lang={lang} />
         <ResearchStatus lang={lang} practiceDone={passed} />
+        <NextStepCard placement="profile" />
+        <LearnerPanel />
 
         {features.gamification && allPassed && (
           <motion.div className="profile-cert-banner" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.5 }}>

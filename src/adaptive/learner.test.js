@@ -54,3 +54,12 @@ test("всё пройдено и итоговый открыт → итогов�
   const s = nextStep(buildLearnerModel({ lessonRead, testResults }), { now, postUnlocked: true });
   assert.equal(s.kind, "post");
 });
+
+test("0 из 5 и одна подсказка → вернуться к уроку, а не «без подсказок»", () => {
+  const rows = [0, 1, 2, 3, 4].map(i => row("phishing", false, 5, { hintUsed: i === 0, difficulty: 1 + (i % 2) }));
+  const m = buildLearnerModel({ interactions: rows, lessonRead: { phishing: at(10) }, testResults: { 3: { score: 0, total: 5 } } });
+  assert.equal(m.global.profile, "Hint-Dependent");
+  const s = nextStep(m, { now });
+  assert.equal(s.topic, "phishing");
+  assert.equal(s.kind, "review");
+});

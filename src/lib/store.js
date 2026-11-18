@@ -9,6 +9,7 @@ const KEYS = {
   lessons: "lessonRead",
   profile: "userProfile",
   interactions: "interactions",   // журнал обучающих ответов — вход нечёткой модели
+  preTopics: "preTopics",         // входной тест по темам: { topic: {correct, total} }
 };
 
 const MAX_LOCAL_INTERACTIONS = 1000;
@@ -16,7 +17,7 @@ const MAX_LOCAL_INTERACTIONS = 1000;
 // Ключи, относящиеся к конкретному человеку: чистятся при выходе из аккаунта,
 // чтобы на общем компьютере (например, в компьютерном классе) следующий участник
 // не видел чужой прогресс.
-const PERSONAL_KEYS = [KEYS.results, KEYS.lessons, KEYS.profile, KEYS.interactions, "gameState", "hgHiScore", "phishingRounds", "snCorrect"];
+const PERSONAL_KEYS = [KEYS.results, KEYS.lessons, KEYS.profile, KEYS.interactions, KEYS.preTopics, "gameState", "hgHiScore", "phishingRounds", "snCorrect"];
 
 let currentUserId = null;
 export function setCurrentUser(id) { currentUserId = id; }
@@ -49,6 +50,13 @@ export const getTestResults = () => readJSON(KEYS.results, {});
 export const getLessonRead  = () => readJSON(KEYS.lessons, {});
 export const getProfile     = () => readJSON(KEYS.profile, null);
 export const getInteractions = () => readJSON(KEYS.interactions, []);
+export const getPreTopics = () => readJSON(KEYS.preTopics, {});
+
+/** Результат входного теста по темам — стартовая оценка знаний для адаптивности. */
+export function savePreTopics(map) {
+  writeJSON(KEYS.preTopics, map);
+  notifyStore({ type: "preTopics" });
+}
 
 // ── События ──────────────────────────────────────────────────
 export async function logEvent(type, payload = {}) {
@@ -199,7 +207,7 @@ export async function saveProfile(profile) {
 export async function hydrateFromServer(userId) {
   if (!supabase) return null;
 
-  const [profileRes, attemptsRes, lessonsRes, interRes] = await Promise.all([
+  const [profileRes, attemptsRes, lessonsRes, interRes, preRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).single(),
     supabase.from("test_attempts")
       .select("test_id, phase, score, total, created_at")
@@ -214,12 +222,29 @@ export async function hydrateFromServer(userId) {
       .eq("user_id", userId)
       .order("created_at", { ascending: true })
       .limit(MAX_LOCAL_INTERACTIONS),
+    supabase.from("answers")
+      .select("question_id, is_correct, test_attempts!inner(phase)")
+      .eq("user_id", userId).eq("test_attempts.phase", "pre"),
   ]);
   warn("hydrate/profile", profileRes.error);
   warn("hydrate/attempts", attemptsRes.error);
   warn("hydrate/lessons", lessonsRes.error);
 
   const remote = profileRes.data;
+
+  if (preRes.data?.length) {
+    const { ASSESSMENT } = await import("../research/assessmentData.js");
+    const topicOf = Object.fromEntries(ASSESSMENT.ru.map(q => [q.id, q.topic]));
+    const map = {};
+    for (const a of preRes.data) {
+      const t = topicOf[a.question_id];
+      if (!t) continue;
+      map[t] ??= { correct: 0, total: 0 };
+      map[t].total += 1;
+      map[t].correct += a.is_correct ? 1 : 0;
+    }
+    writeJSON(KEYS.preTopics, map);
+  }
 
   if (interRes.data) {
     writeJSON(KEYS.interactions, interRes.data.map(r => ({

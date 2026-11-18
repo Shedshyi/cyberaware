@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { assess as fuzzyAssess } from "../adaptive/fuzzy";
+import { logEvent, logInteraction } from "../lib/store";
+
+const DIFF_NUM = { Easy: 1, Medium: 2, Hard: 3 };
 
 const QUESTIONS = [
   { id:1, difficulty:"Easy",   text:"Что такое фишинг?", options:["Техника ловли рыбы в интернете","Мошенничество с целью кражи данных через поддельные сайты","Тип вируса, шифрующий файлы","Метод шифрования трафика"], correct:1, hint:"Злоумышленник 'ловит' жертву как рыбак — отсюда название (англ. fish = рыба)." },
@@ -37,56 +41,7 @@ const SIGS = [
   { key:"ss", label:"Стагнация",           invert:true  },
 ];
 
-// ── Algorithm ──────────────────────────────────────────────────────────────
-function computeWA(s) {
-  const W = { Easy:1, Medium:2, Hard:3 };
-  const num = s.reduce((a,q) => a+(q.correct?W[q.difficulty]:0), 0);
-  const den = s.reduce((a,q) => a+W[q.difficulty], 0);
-  return den ? +(num/den).toFixed(3) : 0;
-}
-function computeGS(s) {
-  const hard = s.filter(q => q.difficulty==="Hard");
-  if (!hard.length) return 0;
-  return +(hard.filter(q => q.correct && q.response_time_seconds<30 && !q.hint_used).length / hard.length).toFixed(3);
-}
-function computeHP(s) {
-  const hints   = s.filter(q=>q.hint_used).length;
-  const correct = s.filter(q=>q.correct).length;
-  return +Math.min(hints/(correct+0.01), 1.0).toFixed(3);
-}
-function computeFI(s) {
-  const w = s.slice(-5);
-  if (w.length<2) return 0;
-  let count=0;
-  for (let i=1;i<w.length;i++) {
-    if (w[i].response_time_seconds>w[i-1].response_time_seconds && !w[i].correct && w[i-1].correct) count++;
-  }
-  return +(count/(w.length-1)).toFixed(3);
-}
-function computeSS(s) {
-  const w = s.slice(-5);
-  if (w.length<2) return 0;
-  const vals = w.map(q=>q.correct?1:0);
-  const mean = vals.reduce((a,v)=>a+v,0)/vals.length;
-  const variance = vals.reduce((a,v)=>a+(v-mean)**2,0)/vals.length;
-  return +Math.max(0,1-variance).toFixed(3);
-}
-function fuzzyRule(wa,gs,hp,fi,ss) {
-  const WA_H=wa>=0.7, WA_M=wa>=0.4&&wa<0.7, WA_L=wa<0.4;
-  const GS_H=gs>=0.3, HP_H=hp>=0.4, FI_H=fi>=0.4, SS_H=ss>=0.6;
-  if (WA_H&&!GS_H&&!HP_H&&!FI_H&&!SS_H) return "Advanced";
-  if (WA_H&&GS_H&&!HP_H&&!FI_H)         return "Intermediate";
-  if (WA_H&&!GS_H&&HP_H&&!FI_H)         return "Intermediate";
-  if (WA_H&&!GS_H&&!HP_H&&FI_H)         return "Intermediate";
-  if (WA_H&&!GS_H&&!HP_H&&!FI_H&&SS_H)  return "Intermediate";
-  if (WA_M&&!GS_H&&!HP_H&&!FI_H)        return "Intermediate";
-  if (WA_M&&GS_H)                        return "Beginner";
-  if (WA_M&&HP_H)                        return "Beginner";
-  if (WA_M&&FI_H)                        return "Intermediate";
-  if (WA_L)                              return "Beginner";
-  if (WA_H&&GS_H&&HP_H)                 return "Intermediate";
-  return "Intermediate";
-}
+// Алгоритм — модель из статьи ID137 (src/adaptive/fuzzy.js); здесь только адаптер.
 function getRec(level,profile) {
   if (level==="Beginner") {
     if (profile==="Guessing")       return "Не торопись — читай каждый вариант внимательно. Начни с уроков по основам: паролям и фишингу.";
@@ -102,18 +57,18 @@ function getRec(level,profile) {
   return "Хорошая база! Углубись в практику: тренажёры по фишингу и социальной инженерии помогут перейти на Advanced.";
 }
 function assess(session) {
-  const wa=computeWA(session), gs=computeGS(session), hp=computeHP(session),
-        fi=computeFI(session), ss=computeSS(session);
-  const c = +Math.max(0.1,Math.min(1.0,1-0.6*gs-0.4*fi)).toFixed(2);
-  let consec=0, maxConsec=0;
-  for (const q of session) { consec=q.correct?0:consec+1; if(consec>maxConsec) maxConsec=consec; }
-  const rawResult = fuzzyRule(wa,gs,hp,fi,ss);
-  const rawScore  = {Advanced:85,Intermediate:55,Beginner:20}[rawResult];
-  const adjScore  = +(rawScore*c).toFixed(1);
-  const level = maxConsec>=3?"Beginner":adjScore>=65?"Advanced":adjScore>=35?"Intermediate":"Beginner";
-  const profile = gs>=0.5?"Guessing":fi>=0.5?"Fatigued":hp>=0.6?"Hint-Dependent":(ss>=0.8&&wa<0.7)?"Stagnating":"Consistent";
-  return { signals:{wa,gs,hp,fi,ss}, confidence:c, raw_score:rawScore, adjusted_score:adjScore,
-           skill_level:level, behavior_profile:profile, recommendation:getRec(level,profile) };
+  const r = fuzzyAssess(session.map(q => ({
+    correct: q.correct,
+    timeSec: q.response_time_seconds,
+    hint: q.hint_used,
+    difficulty: DIFF_NUM[q.difficulty],
+  })));
+  return {
+    signals: { wa: r.signals.WA, gs: r.signals.GS, hp: Math.min(1, r.signals.HP), fi: r.signals.FI, ss: r.signals.SS },
+    confidence: r.confidence, raw_score: r.S, adjusted_score: r.S_adj,
+    skill_level: r.level, behavior_profile: r.profile, rules: r.firedRules,
+    recommendation: getRec(r.level, r.profile),
+  };
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -145,10 +100,17 @@ export default function SkillAssessment() {
     const correct = optIdx===q.correct;
     setAnswered({correct,selectedIdx:optIdx});
     const entry = { question_id:q.id, difficulty:q.difficulty, correct, response_time_seconds:elapsed, hint_used:hintUsed };
+    logInteraction({ source: "skill_check", topic: null, itemId: q.id, correct, responseMs: elapsed * 1000, hintUsed, difficulty: DIFF_NUM[q.difficulty] });
     setTimeout(()=>{
       const next = [...sessRef.current, entry];
       sessRef.current = next;
-      if (qIdx+1>=QUESTIONS.length) { setResult(assess(next)); setPhase("result"); }
+      if (qIdx+1>=QUESTIONS.length) {
+        const res = assess(next);
+        logEvent("model_assessment", { context: "skill_check", level: res.skill_level, profile: res.behavior_profile,
+          S: res.raw_score, C: res.confidence, S_adj: res.adjusted_score, rules: res.rules.map(x => x.id),
+          signals: Object.fromEntries(Object.entries(res.signals).map(([k, v]) => [k, +v.toFixed(2)])) });
+        setResult(res); setPhase("result");
+      }
       else { setQIdx(i=>i+1); setAnswered(null); setHintOn(false); setHintUsed(false); setElapsed(0); }
     }, 900);
   };
@@ -193,7 +155,7 @@ export default function SkillAssessment() {
               </div>
               <div className="sa-score-block">
                 <div className="sa-score-num" style={{color:lm.color}}>{result.adjusted_score}</div>
-                <div className="sa-score-den">/ 85</div>
+                <div className="sa-score-den">/ 100</div>
                 <div className="sa-score-lbl">Итоговый балл</div>
               </div>
             </div>

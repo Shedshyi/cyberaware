@@ -1,0 +1,68 @@
+/* ── Next step card (.ns-*) ─────────────────────────────────── */
+.ns-card {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+  border: 1px solid #e0e7ff;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  margin: 0 0 20px;
+}
+.ns-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: grid; place-items: center;
+  background: #fff; font-size: 24px;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, .12);
+}
+.ns-eyebrow { margin: 0 0 2px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6366f1; }
+.ns-action  { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #1f2433; line-height: 1.35; }
+.ns-reason  { margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5; }
+.ns-reason span { font-weight: 600; color: #374151; }
+.ns-go {
+  font: inherit; font-weight: 700; font-size: 14px;
+  min-height: 44px; padding: 0 18px; border: none; border-radius: 12px;
+  background: #4f46e5; color: #fff; cursor: pointer; white-space: nowrap;
+  transition: background .15s, transform .1s;
+}
+.ns-go:hover { background: #4338ca; }
+.ns-go:active { transform: scale(.98); }
+@media (max-width: 600px) {
+  .ns-card { grid-template-columns: 40px 1fr; padding: 16px; gap: 12px; }
+  .ns-icon { width: 40px; height: 40px; font-size: 20px; }
+  .ns-go { grid-column: 1 / -1; width: 100%; }
+}
+html[data-theme="dark"] .ns-card { background: linear-gradient(135deg, #1e1b4b, #1a1d27); border-color: #312e81; }
+html[data-theme="dark"] .ns-icon { background: #12151f; box-shadow: none; }
+html[data-theme="dark"] .ns-eyebrow { color: #a5b4fc; }
+html[data-theme="dark"] .ns-action { color: #e2e8f0; }
+html[data-theme="dark"] .ns-reason { color: #94a0b4; }
+html[data-theme="dark"] .ns-reason span { color: #cbd5e1; }
+
+/* ── Learner panel (.lpn-*) ─────────────────────────────────── */
+.lpn-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 22px; margin-bottom: 20px; font-family: 'Inter', 'Segoe UI', sans-serif; }
+.lpn-title { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #1f2433; }
+.lpn-global { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }
+.lpn-help { flex-basis: 100%; margin: 4px 0 0; font-size: 14px; line-height: 1.5; color: #4b5563; }
+.lpn-meta { flex-basis: 100%; margin: 0; font-size: 12px; color: #9ca3af; }
+.lpn-chip { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.lp-lv-beg { background: #fef3c7; color: #92400e; }
+.lp-lv-int { background: #e0e7ff; color: #3730a3; }
+.lp-lv-adv { background: #d1fae5; color: #065f46; }
+.lpn-chip-profile { background: #f3f4f6; color: #374151; }
+.lpn-chip-none { background: #f9fafb; color: #9ca3af; font-weight: 600; }
+.lpn-topics { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+.lpn-topic { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 36px; border-bottom: 1px solid #f3f4f6; font-size: 14px; color: #374151; }
+.lpn-topic-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) { .lpn-topics { grid-template-columns: 1fr; } .lpn-card { padding: 18px; } }
+html[data-theme="dark"] .lpn-card { background: #1a1d27; border-color: #2a2f3d; }
+html[data-theme="dark"] .lpn-title { color: #e2e8f0; }
+html[data-theme="dark"] .lpn-help, html[data-theme="dark"] .lpn-topic { color: #cbd5e1; }
+html[data-theme="dark"] .lpn-topic { border-color: #2a2f3d; }
+html[data-theme="dark"] .lpn-chip-profile { background: #2a2f3d; color: #cbd5e1; }
+html[data-theme="dark"] .lpn-chip-none { background: #12151f; color: #6b7280; }
+html[data-theme="dark"] .lp-lv-beg { background: rgba(245,158,11,.15); color: #fbbf24; }
+html[data-theme="dark"] .lp-lv-int { background: rgba(99,102,241,.18); color: #c7d2fe; }
+html[data-theme="dark"] .lp-lv-adv { background: rgba(16,185,129,.15); color: #6ee7b7; }
