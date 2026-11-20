@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useExperience } from "../research/experience";
 
 function loadResults() {
   try { return JSON.parse(localStorage.getItem("testResults")) || {}; } catch { return {}; }
@@ -20,6 +21,7 @@ const ICONS = ["🧭","🔐","🎣","📱","🦠","📡","🔄","🕵️","🚨"
 
 export default function Tests() {
   const { t, lang } = useLanguage();
+  const { features } = useExperience();
   const lessons = lang === "en" ? lessonsEN : lessonsRU;
   const [results] = useState(() => loadResults());
 
@@ -67,7 +69,7 @@ export default function Tests() {
               </span>
               <span className="ts-summary-label">{lang === "en" ? "tests ≥ 75%" : "тестов ≥ 75%"}</span>
             </div>
-            {passedAll && (
+            {features.gamification && passedAll && (
               <>
                 <div className="ts-summary-sep" />
                 <Link to="/certificate" className="ts-cert-chip">

@@ -87,7 +87,7 @@ export default function Home() {
           <motion.p className="hv2-subtitle"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}>
-            {t("home.subtitle")}
+            {t(features.trainers ? "home.subtitle" : "home.subtitleTrad")}
           </motion.p>
 
           <motion.div className="hv2-actions"
@@ -104,8 +104,8 @@ export default function Home() {
           {[
             { value: "10",  label: t("home.stats.topics")    },
             { value: "50+", label: t("home.stats.questions") },
-            { value: "6",   label: t("home.stats.trainers")  },
-          ].map(s => (
+            features.trainers && { value: "6", label: t("home.stats.trainers") },
+          ].filter(Boolean).map(s => (
             <div className="hv2-stat" key={s.label}>
               <span className="hv2-stat-value">{s.value}</span>
               <span className="hv2-stat-label">{s.label}</span>
@@ -132,7 +132,7 @@ export default function Home() {
                 </p>
                 <p className="hv2-progress-sub">
                   {passedAll
-                    ? t("home.progress.complete")
+                    ? t(features.gamification ? "home.progress.complete" : "home.progress.completeTrad")
                     : t("home.progress.done", { done, avg: avgPct })}
                 </p>
               </div>
@@ -145,8 +145,8 @@ export default function Home() {
               </div>
               <span className="hv2-progress-pct">{done}/10</span>
             </div>
-            <Link to={passedAll ? "/certificate" : "/lessons"} className="hv2-progress-btn">
-              {passedAll ? t("home.progress.certificate") : t("home.progress.continue")}
+            <Link to={!passedAll ? "/lessons" : features.gamification ? "/certificate" : "/analytics"} className="hv2-progress-btn">
+              {!passedAll ? t("home.progress.continue") : t(features.gamification ? "home.progress.certificate" : "home.progress.results")}
             </Link>
           </motion.div>
         </section>
@@ -164,7 +164,7 @@ export default function Home() {
         <div className="hv2-features-inner">
           <p className="hv2-section-eyebrow">{t("home.features.eyebrow")}</p>
           <h2 className="hv2-section-title">{t("home.features.title")}</h2>
-          <p className="hv2-section-sub">{t("home.features.subtitle")}</p>
+          <p className="hv2-section-sub">{t(features.trainers ? "home.features.subtitle" : "home.features.subtitleTrad")}</p>
 
           <motion.div className="hv2-cards"
             variants={stagger} initial="hidden"
@@ -190,15 +190,15 @@ export default function Home() {
       <section className="hv2-how">
         <div className="hv2-how-inner">
           <p className="hv2-section-eyebrow">{t("home.how.eyebrow")}</p>
-          <h2 className="hv2-section-title">{t("home.how.title")}</h2>
+          <h2 className="hv2-section-title">{t(features.gamification ? "home.how.title" : "home.how.titleTrad")}</h2>
           <motion.div className="hv2-steps"
             variants={stagger} initial="hidden"
             whileInView="visible" viewport={{ once: true, margin: "-40px" }}>
             {[0,1,2].map(i => (
               <motion.div key={i} className="hv2-step" variants={fadeUp}>
                 <div className="hv2-step-num">{i + 1}</div>
-                <h3 className="hv2-step-title">{t(`home.how.steps.${i}.title`)}</h3>
-                <p className="hv2-step-desc">{t(`home.how.steps.${i}.desc`)}</p>
+                <h3 className="hv2-step-title">{t(i === 2 && !features.gamification ? "home.how.stepTrad.title" : `home.how.steps.${i}.title`)}</h3>
+                <p className="hv2-step-desc">{t(i === 2 && !features.gamification ? "home.how.stepTrad.desc" : `home.how.steps.${i}.desc`)}</p>
               </motion.div>
             ))}
           </motion.div>

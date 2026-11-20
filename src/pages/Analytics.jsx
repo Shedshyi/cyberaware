@@ -135,7 +135,7 @@ export default function Analytics() {
       </motion.div>
 
       {/* ── Certificate banner ── */}
-      {passedAll && (
+      {features.gamification && passedAll && (
         <motion.div
           className="an-cert-banner"
           initial={{ opacity: 0, scale: 0.97 }}

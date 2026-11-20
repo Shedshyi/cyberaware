@@ -1,16 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useExperience } from "../research/experience";
 
 const FooterBar = () => {
   const { t } = useLanguage();
+  const { features } = useExperience();
   const links = [
     { to: "/lessons",   label: t("nav.lessons") },
     { to: "/tests",     label: t("nav.tests") },
     { to: "/fun",       label: t("nav.trainers") },
     { to: "/analytics", label: t("nav.analytics") },
     { to: "/profile",   label: t("nav.profile") },
-  ];
+  ].filter(l => l.to !== "/fun" || features.trainers);
   return (
     <footer className="ft-root">
       <div className="ft-inner">
