@@ -17,7 +17,9 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test \"src/**/*.test.js\"",
+    "test": "node --test \"src/**/*.test.js\" \"analysis/*.test.js\"",
+    "analyze": "node analysis/analyze.js",
+    "analyze:demo": "node analysis/demo-data.js analysis/demo && node analysis/analyze.js analysis/demo",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },

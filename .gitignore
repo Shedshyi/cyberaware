@@ -24,3 +24,8 @@ yarn-error.log*
 
 .env
 .claude/
+
+# research data — never commit (exports with participant data)
+/data/
+/analysis/demo/
+*.csv
