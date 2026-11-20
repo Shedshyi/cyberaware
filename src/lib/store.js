@@ -81,7 +81,8 @@ export async function saveTestResult({ testId, score, total, answers = [], durat
   const date = new Date().toISOString();
   if (phase === "practice") {
     const prev = getTestResults();
-    prev[testId] = { score, total, date };
+    const attempts = (prev[testId] ? (prev[testId].attempts ?? 1) : 0) + 1;
+    prev[testId] = { score, total, date, attempts };
     writeJSON(KEYS.results, prev);
   }
 
@@ -259,7 +260,10 @@ export async function hydrateFromServer(userId) {
   if (attemptsRes.data) {
     const results = {};
     for (const a of attemptsRes.data) {
-      if (a.phase === "practice") results[a.test_id] = { score: a.score, total: a.total, date: a.created_at };
+      if (a.phase === "practice") {
+        const attempts = (results[a.test_id]?.attempts ?? 0) + 1;
+        results[a.test_id] = { score: a.score, total: a.total, date: a.created_at, attempts };
+      }
       else research[a.phase] = { score: a.score, total: a.total, date: a.created_at };
     }
     writeJSON(KEYS.results, results);

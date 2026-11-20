@@ -5,7 +5,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { getTestResults, savePreTopics, saveTestResult } from "../../lib/store";
 import { ASSESSMENT_TEST_ID, getAssessment } from "../../research/assessmentData";
-import { RESEARCH } from "../../research/config";
+import { postGate } from "../../research/config";
 import "../../research/research.css";
 
 const pct = (r) => Math.round((r.score / r.total) * 100);
@@ -40,7 +40,8 @@ export default function AssessmentPage() {
 
   const done = research?.[phase];
   const practiceDone = Object.keys(getTestResults()).length;
-  const need = RESEARCH.postTestMinPracticeTests;
+  const gate = postGate({ research, practiceDone, isTest: !!profile.is_test });
+  const need = gate.need;
 
   // ── Уже сдан ──
   if (done) {
@@ -58,7 +59,9 @@ export default function AssessmentPage() {
           )}
           <p className="rs-note" style={{ marginBottom: 20 }}>
             {phase === "pre"
-              ? (en ? `The course is now open. The final test unlocks after ${need} practice tests.` : `Курс открыт. Итоговый тест откроется после ${need} практических тестов.`)
+              ? (en
+                ? `The course is now open. The final test unlocks after ${need} practice tests${gate.days ? ` and no earlier than ${gate.days} days from today` : ""}.`
+                : `Курс открыт. Итоговый тест откроется после ${need} практических тестов${gate.days ? ` и не раньше чем через ${gate.days} дн.` : ""}.`)
               : (en ? "Thank you for taking part in the study!" : "Спасибо за участие в исследовании!")}
           </p>
           <div className="rs-actions" style={{ justifyContent: "center" }}>
@@ -72,7 +75,7 @@ export default function AssessmentPage() {
   }
 
   // ── Итоговый тест ещё закрыт ──
-  if (phase === "post" && (!research?.pre || practiceDone < need)) {
+  if (phase === "post" && !gate.unlocked) {
     return (
       <div className="rs-page">
         <div className="rs-card">
@@ -80,6 +83,10 @@ export default function AssessmentPage() {
           <h1 className="rs-title">{en ? "Not available yet" : "Пока недоступен"}</h1>
           {!research?.pre ? (
             <p className="rs-lead">{en ? "Take the entry test first." : "Сначала пройди входной тест."}</p>
+          ) : gate.practiceOk ? (
+            <p className="rs-lead" style={{ marginBottom: 0 }}>{en
+              ? `Practice done! The final test opens ${gate.days} days after the entry test — in ${gate.daysLeft} d (${new Date(gate.unlockAt).toLocaleDateString("en-GB")}). Meanwhile you can keep practising.`
+              : `Практика пройдена! Итоговый тест откроется через ${gate.days} дн. после входного — осталось ${gate.daysLeft} дн. (${new Date(gate.unlockAt).toLocaleDateString("ru-RU")}). Пока можно продолжать заниматься.`}</p>
           ) : (
             <>
               <p className="rs-lead" style={{ marginBottom: 0 }}>{en

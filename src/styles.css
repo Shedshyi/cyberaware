@@ -3273,6 +3273,16 @@ a {
 
 /* Review cards */
 .tp-review { margin-top: 4px; }
+.tp-review-locked {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #eef2ff;
+  border: 1px solid #e0e7ff;
+  color: #3730a3;
+  font-size: 14px;
+  line-height: 1.5;
+}
 .tp-review-title {
   font-size: 18px;
   font-weight: 700;
@@ -3527,6 +3537,7 @@ html[data-theme="dark"] .tp-btn-retry { background: #222638 !important; color: #
 html[data-theme="dark"] .tp-review { background: var(--bg); }
 html[data-theme="dark"] .tp-review-card { background: #1a1d27 !important; border-color: #2d3347 !important; }
 html[data-theme="dark"] .tp-review-title, html[data-theme="dark"] .tp-review-q { color: #e2e8f0 !important; }
+html[data-theme="dark"] .tp-review-locked { background: #1e1b3a; color: #c7d2fe; border-color: #312e81; }
 html[data-theme="dark"] .tp-review-label { color: #8b95a8 !important; }
 html[data-theme="dark"] .tp-review-val { color: #c9d3e0 !important; }
 html[data-theme="dark"] .tp-review-explanation { background: #222638 !important; border-color: #2d3347 !important; }

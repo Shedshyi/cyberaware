@@ -10,7 +10,7 @@ import NextStepCard from "../components/NextStepCard";
 import LearnerPanel from "../components/LearnerPanel";
 import CareerCard from "../components/CareerCard";
 import { getProfile, getTestResults, saveProfile } from "../lib/store";
-import { RESEARCH } from "../research/config";
+import { RESEARCH, postGate } from "../research/config";
 import "../research/research.css";
 
 const AVATAR_COLORS = [
@@ -44,18 +44,21 @@ function ResearchStatus({ lang, practiceDone }) {
   }
   if (!research.pre) return null;
 
-  const need = RESEARCH.postTestMinPracticeTests;
+  const gate = postGate({ research, practiceDone, isTest: !!profile.is_test });
+  const need = gate.need;
   return (
     <div className="rs-status">
       <span>
         🔬 {en ? "Entry test:" : "Входной тест:"} <b>{p(research.pre)}%</b>
         {research.post
           ? <> · {en ? "Final test:" : "Итоговый тест:"} <b>{p(research.post)}%</b></>
-          : practiceDone >= need
+          : gate.unlocked
             ? <> · {en ? "The final test is open!" : "Итоговый тест открыт!"}</>
-            : <> · {en ? `Final test after ${need} practice tests (${practiceDone}/${need})` : `Итоговый тест после ${need} практических тестов (${practiceDone}/${need})`}</>}
+            : !gate.practiceOk
+              ? <> · {en ? `Final test after ${need} practice tests (${practiceDone}/${need})` : `Итоговый тест после ${need} практических тестов (${practiceDone}/${need})`}</>
+              : <> · {en ? `Final test opens in ${gate.daysLeft} d` : `Итоговый тест откроется через ${gate.daysLeft} дн.`}</>}
       </span>
-      {!research.post && practiceDone >= need && (
+      {!research.post && gate.unlocked && (
         <Link to="/research/post" className="rs-btn rs-btn-primary">{en ? "Take the final test →" : "Пройти итоговый тест →"}</Link>
       )}
     </div>

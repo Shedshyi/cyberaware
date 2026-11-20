@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { getInteractions, getLessonRead, getPreTopics, getTestResults, STORE_EVENT } from "../lib/store";
 import { useAuth } from "../auth/AuthContext";
-import { RESEARCH } from "../research/config";
+import { postGate } from "../research/config";
 import { buildLearnerModel, nextStep } from "./learner";
 
 /** Текущая модель ученика и следующий шаг; пересчитываются при любом изменении данных. */
 export function useLearner() {
-  const { research } = useAuth();
+  const { research, profile } = useAuth();
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
@@ -24,9 +24,9 @@ export function useLearner() {
       lessonRead: getLessonRead(),
       preTopics: getPreTopics(),
     });
-    const postUnlocked = !!research?.pre && Object.keys(testResults).length >= RESEARCH.postTestMinPracticeTests;
+    const postUnlocked = postGate({ research, practiceDone: Object.keys(testResults).length, isTest: !!profile?.is_test }).unlocked;
     const step = nextStep(model, { postUnlocked, postDone: !!research?.post });
     return { model, step };
     // version меняется при изменении данных в хранилище
-  }, [version, research]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [version, research, profile?.is_test]); // eslint-disable-line react-hooks/exhaustive-deps
 }

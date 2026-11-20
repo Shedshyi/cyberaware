@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import testsDataRU from "../data/testsData";
@@ -6,8 +6,10 @@ import testsDataEN from "../data/testsData.en";
 import lessonsRU from "../data/lessonsData";
 import lessonsEN from "../data/lessonsData.en";
 import { useLanguage } from "../i18n/LanguageContext";
-import { logInteraction, saveTestResult } from "../lib/store";
-import { diffLevel } from "../adaptive/items";
+import { logInteraction, saveTestResult, logEvent, getInteractions, getTestResults } from "../lib/store";
+import { TOPIC_BY_TEST } from "../adaptive/items";
+import { pickPractice, itemHistory, practiceLevel, attemptNumber, REVEAL_FROM_ATTEMPT } from "../adaptive/practice";
+import { useLearner } from "../adaptive/useLearner";
 import NextStepCard from "../components/NextStepCard";
 import { useExperience } from "../research/experience";
 import { logModelSnapshot } from "../adaptive/snapshot";
@@ -30,7 +32,38 @@ function TestPage() {
   const testsData = lang === "en" ? testsDataEN : testsDataRU;
   const lessons   = lang === "en" ? lessonsEN   : lessonsRU;
 
-  const questions = testsData[id] || [];
+  const { features } = useExperience();
+  const { model } = useLearner();
+
+  // Подбор 5 вопросов из банка темы (src/adaptive/practice.js). Выбор делается по русскому
+  // банку и хранится как id, поэтому смена языка во время теста не меняет вопросы.
+  const makePick = () => {
+    const { level, source } = practiceLevel(model, TOPIC_BY_TEST[id]);
+    const { items, mix } = pickPractice({
+      bank: testsDataRU[id] || [],
+      adaptive: features.adaptive,
+      level,
+      history: itemHistory(getInteractions(), id),
+    });
+    return {
+      ids: items.map(i => i.q.id),
+      orders: Object.fromEntries(items.map(i => [i.q.id, i.order])),
+      level, source, mix,
+      attempt: attemptNumber(getTestResults(), id),
+    };
+  };
+  const [pick, setPick] = useState(makePick);
+  const questions = useMemo(
+    () => pick.ids.map(qid => (testsData[id] || []).find(q => q.id === qid)).filter(Boolean),
+    [pick, testsData, id],
+  );
+  const reveal = pick.attempt >= REVEAL_FROM_ATTEMPT;
+
+  useEffect(() => {
+    if (features.adaptive) {
+      logEvent("adaptation", { trainer: "practice", test: id, level: pick.level, source: pick.source, mix: pick.mix, attempt: pick.attempt });
+    }
+  }, [pick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [current,    setCurrent]    = useState(0);
   const [answers,    setAnswers]    = useState({});
@@ -40,7 +73,6 @@ function TestPage() {
   const [timeLeft,   setTimeLeft]   = useState(TIMER_SEC);
   const [timedOut,   setTimedOut]   = useState(false);
   const [eliminated, setEliminated] = useState({});   // questionId -> индекс убранного подсказкой варианта
-  const { features } = useExperience();
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
@@ -59,7 +91,7 @@ function TestPage() {
       isCorrect: a[q.id] === q.correct,
       responseMs: respMs.current[q.id],
       hintUsed: !!hintsUsed.current[q.id],
-      difficulty: diffLevel(id, q.id),
+      difficulty: q.difficulty ?? 2,
     }));
     saveTestResult({
       testId: id,
@@ -158,6 +190,7 @@ function TestPage() {
     startedAt.current = Date.now();
     shownAt.current = {}; respMs.current = {}; hintsUsed.current = {};
     setEliminated({});
+    setPick(makePick());   // новая попытка — новые вопросы из банка, номер попытки +1
   };
 
   const mins = Math.floor(timeLeft / 60);
@@ -226,7 +259,8 @@ function TestPage() {
               <h2 className="tp-q-text">{q.question}</h2>
 
               <div className="tp-options">
-                {q.options.map((opt, i) => {
+                {(pick.orders[q.id] || [...q.options.keys()]).map((i, pos) => {
+                  const opt = q.options[i];
                   const selected = answers[q.id] === i;
                   const gone = eliminated[q.id] === i;
                   return (
@@ -240,7 +274,7 @@ function TestPage() {
                       whileTap={{ scale: 0.995 }}
                     >
                       <span className={`tp-option-letter${selected ? " tp-letter-sel" : ""}`}>
-                        {String.fromCharCode(65 + i)}
+                        {String.fromCharCode(65 + pos)}
                       </span>
                       <span className="tp-option-text">{opt}</span>
                       {selected && <span className="tp-option-check">✓</span>}
@@ -412,9 +446,14 @@ function TestPage() {
                 transition={{ duration: 0.28 }}
               >
                 <h3 className="tp-review-title">{lang === "en" ? "Error review" : "Разбор ошибок"}</h3>
+                {!reveal && (
+                  <p className="tp-review-locked">{lang === "en"
+                    ? "Correct answers and explanations open from your next attempt. For now, re-read the lesson and try again: you'll get a new set of questions."
+                    : "Правильные ответы и объяснения откроются со следующей попытки. Пока перечитай урок и попробуй снова: вопросы будут другие."}</p>
+                )}
                 {wrongQs.map(qq => (
                   <div key={qq.id} className="tp-review-card">
-                    <p className="tp-review-q">{qq.id}. {qq.question}</p>
+                    <p className="tp-review-q">{questions.indexOf(qq) + 1}. {qq.question}</p>
                     <div className="tp-review-row tp-review-wrong">
                       <span className="tp-review-icon">❌</span>
                       <div>
@@ -422,17 +461,21 @@ function TestPage() {
                         <span className="tp-review-val">{qq.options[answers[qq.id]]}</span>
                       </div>
                     </div>
-                    <div className="tp-review-row tp-review-right">
-                      <span className="tp-review-icon">✅</span>
-                      <div>
-                        <span className="tp-review-label">{lang === "en" ? "Correct answer" : "Правильный ответ"}</span>
-                        <span className="tp-review-val">{qq.options[qq.correct]}</span>
-                      </div>
-                    </div>
-                    <div className="tp-review-explanation">
-                      <span className="tp-review-exp-label">💡 {lang === "en" ? "Explanation" : "Объяснение"}</span>
-                      <p className="tp-review-exp-text">{qq.explanation}</p>
-                    </div>
+                    {reveal && (
+                      <>
+                        <div className="tp-review-row tp-review-right">
+                          <span className="tp-review-icon">✅</span>
+                          <div>
+                            <span className="tp-review-label">{lang === "en" ? "Correct answer" : "Правильный ответ"}</span>
+                            <span className="tp-review-val">{qq.options[qq.correct]}</span>
+                          </div>
+                        </div>
+                        <div className="tp-review-explanation">
+                          <span className="tp-review-exp-label">💡 {lang === "en" ? "Explanation" : "Объяснение"}</span>
+                          <p className="tp-review-exp-text">{qq.explanation}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </motion.div>

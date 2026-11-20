@@ -1,7 +1,15 @@
 // Инструмент оценки киберграмотности для входного (pre) и итогового (post) тестирования.
-// 20 вопросов, по 2 на каждую тему курса. Вопросы НЕ пересекаются с практическими тестами,
-// чтобы прирост отражал усвоение навыка, а не запоминание конкретных вопросов.
-// Один и тот же набор используется до и после обучения (одинаковый порядок).
+// Версия 2 (20.11.2026): 20 вопросов-ситуаций, по 2 на тему курса, id 201–220.
+// Версия 1 (id 101–120) заменена до начала набора: в пилоте человек без обучения набирал 85–100%,
+// а правильный ответ был самым длинным в 18 из 20 вопросов (эффект потолка и подсказка длиной).
+//
+// Требования к вопросам (проверяет src/data/items.lint.test.js):
+//   • варианты одинаковой длины и правдоподобны, правильный не выделяется длиной;
+//   • правильные ответы распределены по позициям поровну;
+//   • вопросы НЕ пересекаются с практическими тестами, чтобы прирост отражал навык,
+//     а не запоминание конкретных вопросов.
+// Один и тот же набор используется до и после обучения; порядок вариантов перемешан
+// детерминированно по id вопроса (одинаков для всех и в pre, и в post).
 //
 // ВАЖНО: после начала эксперимента вопросы не менять — иначе pre и post станут несравнимы.
 // id вопросов стабильны и попадают в таблицу answers (test_id = "assessment").
@@ -23,98 +31,108 @@ export const TOPICS = {
 
 const RU = [
   // basics
-  { id: 101, topic: "basics", question: "В чате группы появилось сообщение: «Срочно! С понедельника занятия отменяются, приказ ректора». Ссылки на источник нет. Что разумнее всего сделать?",
-    options: ["Переслать в другие чаты, чтобы все знали", "Проверить на официальном сайте вуза или у куратора", "Поверить, раз написали в общий чат", "Проигнорировать любые новости о занятиях"], correct: 1 },
-  { id: 102, topic: "basics", question: "Что из перечисленного лучше всего описывает «цифровой след»?",
-    options: ["Только история браузера на компьютере", "Все данные, которые человек оставляет в сети: публикации, лайки, покупки, геометки", "Вирус, который отслеживает действия", "Список паролей, сохранённых в браузере"], correct: 1 },
+  { id: 201, topic: "basics", question: "Знакомый прислал видео, где известный политик призывает вкладываться в «государственную криптоплатформу». Лицо и голос очень похожи. Что разумнее всего?",
+    options: ["Проверить, сообщали ли об этом официальные источники и СМИ", "Вложить небольшую сумму, чтобы проверить, платят ли там", "Поверить: так точно подделать лицо и голос невозможно", "Переслать знакомым, чтобы они тоже успели вложиться"], correct: 0 },
+  { id: 202, topic: "basics", question: "Две статьи по-разному описывают одно и то же событие. Что лучше всего помогает понять, какой из них верить?",
+    options: ["Выбрать ту, у которой больше просмотров и комментариев", "Выбрать ту, что совпадает с мнением моих друзей", "Выбрать ту, у которой более эмоциональный заголовок", "Сравнить, на какие первоисточники и факты они ссылаются"], correct: 3 },
   // passwords
-  { id: 103, topic: "passwords", question: "Какой из вариантов наиболее надёжен для аккаунта в онлайн-банке?",
-    options: ["Almaty2004!", "Длинная фраза из 4–5 случайных слов, уникальная для этого сайта, плюс 2FA", "Тот же пароль, что и от почты, но с цифрой в конце", "Qwerty123456"], correct: 1 },
-  { id: 104, topic: "passwords", question: "Сервис сообщил, что его база паролей утекла. Ты используешь этот же пароль ещё на трёх сайтах. Что делать в первую очередь?",
-    options: ["Ничего, пароли в базе обычно зашифрованы", "Сменить пароль только на этом сервисе", "Сменить пароль на всех сайтах, где он использовался, и сделать их разными", "Удалить аккаунт на этом сервисе"], correct: 2 },
+  { id: 203, topic: "passwords", question: "Сайт требует пароль «минимум 8 символов, буква и цифра». Какой вариант подходит лучше всего?",
+    options: ["Имя и год рождения — такой пароль точно не забудешь", "Фраза из случайных слов, не используемая больше нигде", "Пароль от Instagram с добавленной в конце цифрой 1", "Password1: он подходит под все требования сайта"], correct: 1 },
+  { id: 204, topic: "passwords", question: "Тебе пришёл код для входа в Telegram, хотя ты ничего не запрашивал. Что это значит и что делать?",
+    options: ["Это сбой Telegram, код можно спокойно проигнорировать", "Переслать код в поддержку Telegram, чтобы сообщить о сбое", "Кто-то входит в аккаунт: код никому, включить облачный пароль", "Выйти из Telegram и войти заново, используя этот код"], correct: 2 },
   // phishing
-  { id: 105, topic: "phishing", question: "Пришло SMS: «Kaspi: на ваше имя оформлен кредит. Если это не вы, перейдите: kaspi-otmena.com». Как поступить?",
-    options: ["Перейти по ссылке и отменить кредит", "Ответить на SMS «это не я»", "Не переходить, открыть официальное приложение банка или позвонить по номеру с карты", "Переслать SMS друзьям, чтобы предупредить"], correct: 2 },
-  { id: 106, topic: "phishing", question: "Какой адрес, скорее всего, принадлежит настоящему сайту egov.kz?",
-    options: ["https://egov.kz.login-portal.com", "https://egov-kz.net", "https://egov.kz/cms/ru", "http://egov.kz-services.ru"], correct: 2 },
+  { id: 205, topic: "phishing", question: "В письме «службы доставки» ссылка выглядит как https://kazpost.kz/track, но при наведении внизу браузера виден адрес kaz-post-track.top. Куда ты попадёшь, если нажмёшь?",
+    options: ["На kazpost.kz, потому что так написано в тексте ссылки", "На kazpost.kz, но через защищённый сервер доставки", "Никуда: почтовые сервисы сами блокируют такие ссылки", "На kaz-post-track.top: важен реальный адрес ссылки"], correct: 3 },
+  { id: 206, topic: "phishing", question: "Коллега пишет в рабочем чате: «Глянь документ, нужна твоя подпись», ссылка ведёт на страницу входа Microsoft. Аккаунт коллеги настоящий. Что делать?",
+    options: ["Спросить коллегу по другому каналу, отправлял ли он ссылку", "Войти: аккаунт коллеги настоящий, значит, ссылка безопасна", "Войти, но после этого сразу сменить пароль от аккаунта", "Проверить, что на странице есть логотип и замок HTTPS"], correct: 0 },
   // socials
-  { id: 107, topic: "socials", question: "Друг пишет в Instagram: «Проголосуй за меня в конкурсе, нужно войти через WhatsApp и ввести код из SMS». Что это, скорее всего?",
-    options: ["Обычный конкурс", "Попытка угнать твой аккаунт WhatsApp — аккаунт друга, вероятно, уже взломан", "Новая функция Instagram", "Безопасно, раз пишет знакомый"], correct: 1 },
-  { id: 108, topic: "socials", question: "Какая публикация несёт наибольший риск?",
-    options: ["Фото заката без подписи", "Фото нового паспорта или ID-карты «наконец получил!»", "Репост новости от официального СМИ", "Фото еды в кафе спустя неделю после визита"], correct: 1 },
+  { id: 207, topic: "socials", question: "Ты каждый вечер публикуешь сторис из дома, а днём — из университета. Чем это может быть опасно?",
+    options: ["Соцсеть может ограничить показ слишком частых сторис", "По сторис можно понять распорядок и когда дома никого нет", "Опасности нет: сторис сами исчезают через 24 часа", "Это опасно, только если в сторис виден номер квартиры"], correct: 1 },
+  { id: 208, topic: "socials", question: "Незнакомый аккаунт пишет, что вы учитесь в одном вузе, а через пару дней просит проголосовать в конкурсе по ссылке, войдя через Instagram. Что это, скорее всего?",
+    options: ["Обычный конкурс: вход через Instagram защищает от накруток", "Реклама вуза, которая так собирает голоса студентов", "Попытка угнать аккаунт через поддельную страницу входа", "Ничего опасного, если в профиле много фото и подписчиков"], correct: 2 },
   // malware
-  { id: 109, topic: "malware", question: "На сайте с фильмами всплывает окно: «Ваш телефон заражён! Установите очиститель». Что делать?",
-    options: ["Установить приложение, чтобы удалить вирус", "Закрыть вкладку и ничего не устанавливать", "Позвонить по номеру из окна", "Перезагрузить телефон и установить приложение"], correct: 1 },
-  { id: 110, topic: "malware", question: "Что из этого — наиболее типичный путь заражения Android-смартфона?",
-    options: ["Установка APK-файла из Telegram-канала или с сайта", "Зарядка от собственной розетки", "Просмотр видео в официальном YouTube", "Обновление системы через настройки"], correct: 0 },
+  { id: 209, topic: "malware", question: "Антивирус нашёл угрозу в программе, скачанной с торрента, а на форуме пишут: «Это ложное срабатывание, отключи антивирус». Как поступить?",
+    options: ["Отключить антивирус ненадолго, установить и включить снова", "Запустить файл, если у раздачи много положительных отзывов", "Добавить файл в исключения антивируса, раз все так делают", "Не запускать файл и найти программу в официальном источнике"], correct: 3 },
+  { id: 210, topic: "malware", question: "Какой признак сильнее всего указывает, что на телефоне может быть рекламное или шпионское ПО?",
+    options: ["Появились незнакомые приложения и реклама поверх экрана", "Телефон нагревается во время долгой зарядки ночью", "Батарея садится быстрее, когда долго играешь в игры", "Приложения просят обновиться через Google Play"], correct: 0 },
   // wifi
-  { id: 111, topic: "wifi", question: "В аэропорту доступны сети «Airport_Free» и «Airport Free WiFi». Какая из них безопасна для входа в банк?",
-    options: ["Та, у которой сигнал сильнее", "Любая, если есть HTTPS", "Ни одна не гарантирует безопасность — для банка лучше мобильный интернет", "Та, у которой нет пароля"], correct: 2 },
-  { id: 112, topic: "wifi", question: "Зачем менять стандартный пароль администратора на домашнем роутере?",
-    options: ["Чтобы ускорить интернет", "Стандартные пароли известны и позволяют чужому человеку управлять сетью", "Это требуется провайдером раз в месяц", "Чтобы не нужно было обновлять прошивку"], correct: 1 },
+  { id: 211, topic: "wifi", question: "В аэропорту две открытые сети: «Airport_Free_WiFi» и «Airport Free WiFi». Что разумнее?",
+    options: ["Подключиться к той, у которой сильнее сигнал и выше скорость", "Подключиться к той, где в названии нет нижних подчёркиваний", "Узнать точное имя у аэропорта или взять мобильный интернет", "Подключиться к любой: в аэропорту сети проверяет охрана"], correct: 2 },
+  { id: 212, topic: "wifi", question: "Ты вошёл в соцсеть с компьютера в библиотеке. Что важнее всего сделать, когда уходишь?",
+    options: ["Закрыть вкладку — сессия завершится сама собой", "Выйти из аккаунта и не сохранять пароль в браузере", "Выключить монитор, чтобы никто не видел экран", "Очистить корзину на рабочем столе компьютера"], correct: 1 },
   // updates
-  { id: 113, topic: "updates", question: "Телефон предлагает установить обновление безопасности. Как правильно?",
-    options: ["Отложить на несколько месяцев — обновления часто ломают телефон", "Установить в ближайшее время: они закрывают известные уязвимости", "Никогда не обновлять, чтобы не потерять данные", "Устанавливать только обновления с новыми функциями"], correct: 1 },
-  { id: 114, topic: "updates", question: "Почему опасно пользоваться программой, поддержка которой прекращена (например, старая версия Windows)?",
-    options: ["Она медленнее работает", "Новые уязвимости в ней больше не исправляются", "Она перестаёт открывать файлы", "Это незаконно"], correct: 1 },
+  { id: 213, topic: "updates", question: "Приложение банка перестало открываться и просит обновиться, но обновление большое, а трафик ограничен. Что разумнее?",
+    options: ["Скачать APK старой версии с форума, чтобы сэкономить трафик", "Отключить в настройках телефона проверку версий приложений", "Пользоваться банком по ссылке из SMS вместо приложения", "Обновить через официальный магазин, когда будет Wi-Fi"], correct: 3 },
+  { id: 214, topic: "updates", question: "Компания выпустила срочный патч, потому что уязвимость «активно эксплуатируется». Что это значит?",
+    options: ["Уязвимость нашли, но атак с её использованием пока нет", "Атакующие уже используют её против реальных людей", "Патч сначала проверяют пользователи, а потом выпускают", "Уязвимость опасна только для компаний, а не для людей"], correct: 1 },
   // privacy
-  { id: 115, topic: "privacy", question: "Приложение «Фонарик» при установке просит доступ к контактам, SMS и геолокации. Что это означает?",
-    options: ["Так работают все фонарики", "Приложение запрашивает лишние разрешения — повод отказаться от установки", "Это нужно для яркости", "Ничего страшного, если приложение бесплатное"], correct: 1 },
-  { id: 116, topic: "privacy", question: "Какой способ лучше всего снижает отслеживание тебя рекламными сетями в браузере?",
-    options: ["Режим инкогнито", "Блокировщик трекеров и отказ от необязательных cookie", "Очистка истории раз в год", "Использование только мобильного интернета"], correct: 1 },
+  { id: 215, topic: "privacy", question: "Сервис просит фото удостоверения личности, чтобы «участвовать в розыгрыше». Почему это рискованно?",
+    options: ["Фото документа могут использовать для кредитов и аккаунтов", "Розыгрыши с фото документов запрещены правилами соцсетей", "Это рискованно, только если на фото видно лицо владельца", "Риска нет: на фото документа нет секретных данных"], correct: 0 },
+  { id: 216, topic: "privacy", question: "Ты хочешь, чтобы рекламные сети меньше следили за тобой в браузере. Что поможет лучше всего?",
+    options: ["Режим инкогнито при каждом открытии браузера", "Каждый день вручную очищать историю просмотров", "Блокировщик трекеров и запрет сторонних cookie", "Заходить в интернет только с мобильного телефона"], correct: 2 },
   // recovery
-  { id: 117, topic: "recovery", question: "Ты заметил, что с твоей почты ушли письма, которые ты не отправлял. Что сделать первым?",
-    options: ["Удалить отправленные письма", "Сменить пароль, завершить все сеансы и включить 2FA", "Создать новую почту и забыть про старую", "Подождать — может, это сбой"], correct: 1 },
-  { id: 118, topic: "recovery", question: "Зачем нужны резервные копии важных файлов по правилу «3-2-1»?",
-    options: ["Чтобы файлы быстрее открывались", "Чтобы восстановить данные после поломки, кражи или шифровальщика", "Это нужно только компаниям", "Чтобы освободить место на диске"], correct: 1 },
+  { id: 217, topic: "recovery", question: "На экране компьютера требование выкупа, файлы не открываются. Что сделать первым?",
+    options: ["Сразу заплатить выкуп, пока сумма и сроки не изменились", "Несколько раз перезагрузить компьютер, пока окно не исчезнет", "Удалить все зашифрованные файлы, чтобы освободить место", "Отключить компьютер от сети, чтобы заражение не пошло дальше"], correct: 3 },
+  { id: 218, topic: "recovery", question: "Ты потерял телефон, на котором вход в банк, почту и мессенджеры. Что сделать в первую очередь?",
+    options: ["Заблокировать SIM и удалённо выйти или стереть данные", "Подождать пару дней — вдруг телефон найдётся сам", "Купить новый телефон и восстановить всё из облака", "Написать в соцсетях, что телефон потерян, и ждать"], correct: 0 },
   // summary
-  { id: 119, topic: "summary", question: "Звонит «сотрудник банка», знает твоё ФИО и номер карты, просит назвать код из SMS «для отмены подозрительной операции». Что делать?",
-    options: ["Назвать код — он же знает твои данные", "Положить трубку и самому позвонить в банк по номеру с карты", "Назвать только половину кода", "Попросить перезвонить позже"], correct: 1 },
-  { id: 120, topic: "summary", question: "Какая комбинация мер даёт наилучшую защиту личных аккаунтов?",
-    options: ["Антивирус и сложный пароль, одинаковый везде", "Уникальные пароли (менеджер паролей) + 2FA + своевременные обновления", "Режим инкогнито и VPN", "Частая смена одного и того же пароля"], correct: 1 },
+  { id: 219, topic: "summary", question: "Какое действие даёт обычному студенту больше всего защиты при наименьших усилиях?",
+    options: ["Установить несколько разных антивирусов одновременно", "Каждую неделю менять пароли от всех своих аккаунтов", "Заклеить веб-камеру и отключить микрофон в ноутбуке", "Включить 2FA на почте, ведь через неё сбрасывают пароли"], correct: 3 },
+  { id: 220, topic: "summary", question: "Друг говорит: «Мне нечего скрывать, поэтому кибербезопасность меня не касается». Какой ответ точнее?",
+    options: ["Он прав: атакуют только известных людей и компании", "Он прав, если пользуется только iPhone, а не Android", "Мошенникам нужны его аккаунты и деньги, а не секреты", "Он прав, если не хранит фото в облачных сервисах"], correct: 2 },
 ];
 
 const EN = [
-  { id: 101, topic: "basics", question: "A message appears in your class group chat: \"Urgent! Classes are cancelled from Monday, rector's order.\" No source link. What is the most sensible thing to do?",
-    options: ["Forward it to other chats so everyone knows", "Check the university's official website or ask your advisor", "Believe it since it was posted in the group chat", "Ignore any news about classes"], correct: 1 },
-  { id: 102, topic: "basics", question: "Which best describes a \"digital footprint\"?",
-    options: ["Only the browser history on your computer", "All the data a person leaves online: posts, likes, purchases, geotags", "A virus that tracks your actions", "A list of passwords saved in the browser"], correct: 1 },
-  { id: 103, topic: "passwords", question: "Which option is the most secure for an online banking account?",
-    options: ["Almaty2004!", "A long phrase of 4–5 random words, unique to this site, plus 2FA", "The same password as your email, with a digit at the end", "Qwerty123456"], correct: 1 },
-  { id: 104, topic: "passwords", question: "A service reports that its password database leaked. You use the same password on three other sites. What should you do first?",
-    options: ["Nothing, passwords in databases are usually encrypted", "Change the password only on this service", "Change the password on every site where it was used and make them all different", "Delete your account on this service"], correct: 2 },
-  { id: 105, topic: "phishing", question: "You get an SMS: \"Kaspi: a loan was issued in your name. If it wasn't you, go to: kaspi-otmena.com\". What do you do?",
-    options: ["Follow the link and cancel the loan", "Reply to the SMS saying \"it wasn't me\"", "Don't click; open the official bank app or call the number on your card", "Forward the SMS to friends as a warning"], correct: 2 },
-  { id: 106, topic: "phishing", question: "Which address most likely belongs to the real egov.kz website?",
-    options: ["https://egov.kz.login-portal.com", "https://egov-kz.net", "https://egov.kz/cms/ru", "http://egov.kz-services.ru"], correct: 2 },
-  { id: 107, topic: "socials", question: "A friend writes on Instagram: \"Vote for me in a contest, you need to log in via WhatsApp and enter the SMS code.\" What is this most likely?",
-    options: ["A regular contest", "An attempt to hijack your WhatsApp account — your friend's account is probably already hacked", "A new Instagram feature", "Safe, since it's someone you know"], correct: 1 },
-  { id: 108, topic: "socials", question: "Which post carries the greatest risk?",
-    options: ["A sunset photo without a caption", "A photo of your new passport or ID card: \"finally got it!\"", "A repost of news from an official outlet", "A photo of food at a café a week after the visit"], correct: 1 },
-  { id: 109, topic: "malware", question: "A pop-up on a movie website says: \"Your phone is infected! Install this cleaner.\" What should you do?",
-    options: ["Install the app to remove the virus", "Close the tab and install nothing", "Call the number shown in the pop-up", "Restart the phone and install the app"], correct: 1 },
-  { id: 110, topic: "malware", question: "Which of these is the most typical way an Android phone gets infected?",
-    options: ["Installing an APK file from a Telegram channel or a website", "Charging from your own wall outlet", "Watching videos in the official YouTube app", "Updating the system via Settings"], correct: 0 },
-  { id: 111, topic: "wifi", question: "At the airport you see networks \"Airport_Free\" and \"Airport Free WiFi\". Which is safe for logging into your bank?",
-    options: ["The one with the stronger signal", "Either one, as long as there is HTTPS", "Neither guarantees safety — mobile data is better for banking", "The one without a password"], correct: 2 },
-  { id: 112, topic: "wifi", question: "Why change the default admin password on your home router?",
-    options: ["To make the internet faster", "Default passwords are publicly known and let a stranger control your network", "The ISP requires it monthly", "So you don't have to update the firmware"], correct: 1 },
-  { id: 113, topic: "updates", question: "Your phone offers a security update. What is the right approach?",
-    options: ["Postpone for several months — updates often break phones", "Install it soon: updates fix known vulnerabilities", "Never update, to avoid losing data", "Only install updates that add new features"], correct: 1 },
-  { id: 114, topic: "updates", question: "Why is it dangerous to use software that is no longer supported (e.g., an old Windows version)?",
-    options: ["It runs slower", "New vulnerabilities in it are no longer fixed", "It stops opening files", "It is illegal"], correct: 1 },
-  { id: 115, topic: "privacy", question: "A \"Flashlight\" app asks for access to contacts, SMS and location during installation. What does this mean?",
-    options: ["All flashlight apps work this way", "The app requests unnecessary permissions — a reason not to install it", "It is needed for brightness", "Nothing to worry about if the app is free"], correct: 1 },
-  { id: 116, topic: "privacy", question: "What best reduces tracking by ad networks in your browser?",
-    options: ["Incognito mode", "A tracker blocker and declining non-essential cookies", "Clearing history once a year", "Using only mobile data"], correct: 1 },
-  { id: 117, topic: "recovery", question: "You notice emails sent from your account that you didn't send. What do you do first?",
-    options: ["Delete the sent emails", "Change the password, sign out all sessions and enable 2FA", "Create a new email and forget the old one", "Wait — maybe it's a glitch"], correct: 1 },
-  { id: 118, topic: "recovery", question: "Why keep backups of important files using the \"3-2-1\" rule?",
-    options: ["To make files open faster", "To restore data after hardware failure, theft or ransomware", "Only companies need this", "To free up disk space"], correct: 1 },
-  { id: 119, topic: "summary", question: "A \"bank employee\" calls, knows your full name and card number, and asks for the SMS code \"to cancel a suspicious transaction\". What do you do?",
-    options: ["Tell them the code — they already know your data", "Hang up and call the bank yourself using the number on your card", "Tell them only half of the code", "Ask them to call back later"], correct: 1 },
-  { id: 120, topic: "summary", question: "Which combination of measures best protects personal accounts?",
-    options: ["Antivirus and a strong password reused everywhere", "Unique passwords (password manager) + 2FA + timely updates", "Incognito mode and a VPN", "Frequently changing the same password"], correct: 1 },
+  // basics
+  { id: 201, topic: "basics", question: "A friend sent a video of a well-known politician urging people to invest in a 'state crypto platform'. The face and voice look very real. What is most sensible?",
+    options: ["Check whether official sources and the media reported it", "Invest a small amount to see whether it actually pays out", "Believe it: a face and voice can't be faked this precisely", "Forward it to friends so they can invest in time too"], correct: 0 },
+  { id: 202, topic: "basics", question: "Two articles describe the same event differently. What best helps you decide which one to trust?",
+    options: ["Pick the one with more views and comments", "Pick the one that matches my friends' opinion", "Pick the one with the more emotional headline", "Compare which primary sources and facts they cite"], correct: 3 },
+  // passwords
+  { id: 203, topic: "passwords", question: "A site requires a password of 'at least 8 characters, a letter and a digit'. Which option fits best?",
+    options: ["Your name and birth year — you'll never forget it", "A phrase of random words not used anywhere else", "Your Instagram password with a 1 added at the end", "Password1: it meets all of the site's requirements"], correct: 1 },
+  { id: 204, topic: "passwords", question: "You received a Telegram login code although you didn't request one. What does it mean and what should you do?",
+    options: ["It's just a Telegram glitch, so the code can be safely ignored", "Forward the code to Telegram support so they know about the glitch", "Someone is signing in: don't share it, set a cloud password", "Log out of Telegram and then log back in using this same code"], correct: 2 },
+  // phishing
+  { id: 205, topic: "phishing", question: "In a 'delivery service' email the link reads https://kazpost.kz/track, but hovering shows kaz-post-track.top at the bottom of the browser. Where will you go if you click?",
+    options: ["To kazpost.kz, because that's what the link text says", "To kazpost.kz, but through a secure delivery server", "Nowhere: email services block such links automatically", "To kaz-post-track.top: the real link address is what counts"], correct: 3 },
+  { id: 206, topic: "phishing", question: "A colleague writes in the work chat: 'Look at this document, I need your signature', and the link opens a Microsoft sign-in page. The colleague's account is real. What do you do?",
+    options: ["Ask the colleague through another channel whether they sent it", "Sign in: the colleague's account is real, so the link is safe", "Sign in, then change your account password right away", "Check that the page has the logo and an HTTPS padlock"], correct: 0 },
+  // socials
+  { id: 207, topic: "socials", question: "Every evening you post stories from home, and during the day from university. How can this be dangerous?",
+    options: ["The network may limit how often your stories are shown", "Stories reveal your routine and when no one is home", "No danger: stories disappear by themselves after 24 hours", "It's only dangerous if your flat number is visible"], correct: 1 },
+  { id: 208, topic: "socials", question: "An unknown account says you study at the same university, and a couple of days later asks you to vote in a contest via a link, signing in with Instagram. What is this most likely?",
+    options: ["A normal contest: Instagram sign-in prevents vote cheating", "A university ad that collects student votes this way", "An attempt to steal your account via a fake sign-in page", "Nothing dangerous if the profile has many photos and followers"], correct: 2 },
+  // malware
+  { id: 209, topic: "malware", question: "Antivirus flagged a program downloaded from a torrent, but a forum says: 'It's a false positive, turn off your antivirus'. What should you do?",
+    options: ["Turn off antivirus briefly, install it, then turn it back on", "Run the file if the torrent has many positive comments", "Add the file to antivirus exclusions, since everyone does", "Don't run it, and get the program from an official source"], correct: 3 },
+  { id: 210, topic: "malware", question: "Which sign most strongly suggests adware or spyware on your phone?",
+    options: ["Unknown apps appeared and ads pop up over the screen", "The phone gets warm during a long overnight charge", "The battery drains faster during long gaming sessions", "Apps ask you to update them through Google Play"], correct: 0 },
+  // wifi
+  { id: 211, topic: "wifi", question: "At the airport there are two open networks: 'Airport_Free_WiFi' and 'Airport Free WiFi'. What is sensible?",
+    options: ["Join the one with the stronger signal and higher speed", "Join the one without underscores in its name", "Ask the airport for the exact name or use mobile data", "Join either: airport security checks the networks"], correct: 2 },
+  { id: 212, topic: "wifi", question: "You signed in to social media on a library computer. What matters most when you leave?",
+    options: ["Close the tab — the session will end by itself", "Sign out and don't let the browser save the password", "Turn off the monitor so nobody can see the screen", "Empty the recycle bin on the computer's desktop"], correct: 1 },
+  // updates
+  { id: 213, topic: "updates", question: "Your banking app stopped opening and asks for an update, but the update is large and your data plan is limited. What is sensible?",
+    options: ["Download an older APK from a forum to save data", "Turn off app version checks in your phone settings", "Use the bank through a link from an SMS instead", "Update via the official store once you're on Wi-Fi"], correct: 3 },
+  { id: 214, topic: "updates", question: "A company released an urgent patch because a vulnerability is 'actively exploited'. What does that mean?",
+    options: ["The flaw was found, but no attacks use it yet", "Attackers are already using it against real people", "Users test the patch first, and then it's released", "The flaw only threatens companies, not individuals"], correct: 1 },
+  // privacy
+  { id: 215, topic: "privacy", question: "A service asks for a photo of your ID card to 'enter a giveaway'. Why is this risky?",
+    options: ["An ID photo can be used to open loans and accounts", "Giveaways with ID photos are against social media rules", "It's risky only if the owner's face is visible", "No risk: an ID photo has no secret information"], correct: 0 },
+  { id: 216, topic: "privacy", question: "You want ad networks to track you less in your browser. What helps most?",
+    options: ["Incognito mode every time you open the browser", "Clearing your browsing history by hand every day", "A tracker blocker and blocking third-party cookies", "Going online only from your mobile phone"], correct: 2 },
+  // recovery
+  { id: 217, topic: "recovery", question: "Your computer screen shows a ransom demand and files won't open. What do you do first?",
+    options: ["Pay the ransom right away before the amount goes up", "Restart the computer several times until the window goes", "Delete all encrypted files to free up disk space", "Disconnect the computer from the network to stop the spread"], correct: 3 },
+  { id: 218, topic: "recovery", question: "You lost a phone that is signed in to your bank, email and messengers. What do you do first?",
+    options: ["Block the SIM and remotely sign out or wipe the phone", "Wait a couple of days — maybe the phone will turn up", "Buy a new phone and restore everything from the cloud", "Post on social media that it's lost, and wait"], correct: 0 },
+  // summary
+  { id: 219, topic: "summary", question: "Which action gives an ordinary student the most protection for the least effort?",
+    options: ["Install several different antivirus programs at the same time", "Change the passwords of all your accounts every week", "Cover the webcam and disable the laptop microphone", "Turn on 2FA for email: other passwords are reset through it"], correct: 3 },
+  { id: 220, topic: "summary", question: "A friend says: 'I have nothing to hide, so cybersecurity isn't my concern.' Which reply is most accurate?",
+    options: ["He's right: only famous people and companies get attacked", "He's right if he uses only an iPhone, not Android", "Scammers want his accounts and money, not his secrets", "He's right if he doesn't keep photos in cloud services"], correct: 2 },
 ];
 
 export const ASSESSMENT = { ru: RU, en: EN };
