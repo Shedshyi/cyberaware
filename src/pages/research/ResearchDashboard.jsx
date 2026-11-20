@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { TOPICS } from "../../research/assessmentData";
@@ -62,6 +62,7 @@ export default function ResearchDashboard() {
   const [data, setData]   = useState(null);
   const [error, setError] = useState("");
   const [group, setGroup] = useState("");
+  const [pool, setPool]   = useState("real");
   const isResearcher = profile?.role === "researcher";
   const { preview, setPreview } = useExperience();
 
@@ -71,7 +72,7 @@ export default function ResearchDashboard() {
   };
   useEffect(() => { if (isResearcher) reload(); }, [isResearcher]);
 
-  const all = useMemo(() => (data ? buildParticipants(data) : []), [data]);
+  const all = useMemo(() => (data ? buildParticipants(data, { pool }) : []), [data, pool]);
   const groups = useMemo(() => [...new Set(all.map(p => p.study_group).filter(Boolean))].sort(), [all]);
   const participants = group ? all.filter(p => p.study_group === group) : all;
   const completers = participants.filter(p => p.pre_pct != null && p.post_pct != null);
@@ -105,7 +106,7 @@ export default function ResearchDashboard() {
   const allPaired = pairedTTest(completers.map(p => p.pre_pct), completers.map(p => p.post_pct));
 
   const exportAll = () => {
-    const suffix = group ? `_${group}` : "";
+    const suffix = `${pool === "test" ? "_TEST" : ""}${group ? `_${group}` : ""}`;
     downloadCSV(`participants${suffix}.csv`, participants, PARTICIPANT_COLUMNS);
     downloadCSV(`answers_pre_post${suffix}.csv`, buildAnswersLong(data.answers, participants));
     downloadCSV(`events${suffix}.csv`, buildEventsLong(data.events, participants));
@@ -118,11 +119,16 @@ export default function ResearchDashboard() {
       <h1 className="rs-title">{en ? "Study results" : "Результаты исследования"}</h1>
 
       <div className="rs-filters">
+        <div className="rs-seg">
+          <button type="button" className={pool === "real" ? "on" : ""} onClick={() => setPool("real")}>{en ? "Participants" : "Участники"}</button>
+          <button type="button" className={pool === "test" ? "on" : ""} onClick={() => setPool("test")}>🧪 {en ? "Test accounts" : "Тестовые"}</button>
+        </div>
         <select className="rs-select" value={group} onChange={e => setGroup(e.target.value)}>
           <option value="">{en ? "All groups" : "Все группы"}</option>
           {groups.map(g => <option key={g} value={g}>{g}</option>)}
         </select>
         <button className="rs-btn rs-btn-outline" onClick={reload}>↻ {en ? "Refresh" : "Обновить"}</button>
+        <Link to="/research/admin" className="rs-btn rs-btn-outline">{en ? "Admin panel →" : "Админ-панель →"}</Link>
         <div className="rs-seg" title={en ? "How the site looks to you" : "Как сайт выглядит для тебя"}>
           <button type="button" className={preview !== "traditional" ? "on" : ""} onClick={() => setPreview("full")}>
             {en ? "View: experimental" : "Вид: экспериментальная"}
@@ -136,6 +142,11 @@ export default function ResearchDashboard() {
         </button>
       </div>
 
+      {pool === "test" && (
+        <p className="rs-note" style={{ margin: "0 0 16px" }}>{en
+          ? "🧪 Showing test accounts only. Their exports get the _TEST suffix — don't use them in the thesis."
+          : "🧪 Показаны только тестовые аккаунты. Их выгрузка помечается _TEST — в диссертацию её не брать."}</p>
+      )}
       {error && <p className="rs-error">{error}</p>}
       {!data && !error && <p className="rs-lead">{en ? "Loading…" : "Загрузка…"}</p>}
 

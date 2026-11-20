@@ -46,7 +46,8 @@ function convert(v) {
 }
 
 function findFile(dir, prefix) {
-  const files = fs.readdirSync(dir).filter((f) => f.startsWith(prefix) && f.endsWith(".csv"));
+  // Выгрузки тестовых аккаунтов (суффикс _TEST) в анализ не берутся
+  const files = fs.readdirSync(dir).filter((f) => f.startsWith(prefix) && f.endsWith(".csv") && !f.includes("_TEST"));
   if (!files.length) return null;
   files.sort((a, b) => fs.statSync(path.join(dir, b)).mtimeMs - fs.statSync(path.join(dir, a)).mtimeMs);
   return path.join(dir, files[0]);

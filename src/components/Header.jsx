@@ -96,7 +96,10 @@ function AccountMenu({ profile, en, onClose }) {
       <Link to="/profile" className="nav-menu-item" role="menuitem" onClick={onClose}>{en ? "Profile" : "Профиль"}</Link>
       <Link to="/analytics" className="nav-menu-item" role="menuitem" onClick={onClose}>{en ? "My progress" : "Мой прогресс"}</Link>
       {isResearcher && (
-        <Link to="/research/dashboard" className="nav-menu-item" role="menuitem" onClick={onClose}>{en ? "Study results" : "Результаты исследования"}</Link>
+        <>
+          <Link to="/research/admin" className="nav-menu-item" role="menuitem" onClick={onClose}>{en ? "Admin panel" : "Админ-панель"}</Link>
+          <Link to="/research/dashboard" className="nav-menu-item" role="menuitem" onClick={onClose}>{en ? "Study results" : "Результаты исследования"}</Link>
+        </>
       )}
       {enabled && (
         user ? (
@@ -285,6 +288,7 @@ export default function Header() {
             <Link to="/profile" className={`nav-sheet-link${pathname === "/profile" ? " active" : ""}`}>
               {profile ? t("nav.mobileProfile", { name: profile.name }) : t("nav.profile")}
             </Link>
+            {isResearcher && <Link to="/research/admin" className="nav-sheet-link">{en ? "Admin panel" : "Админ-панель"}</Link>}
             {isResearcher && <Link to="/research/dashboard" className="nav-sheet-link">{en ? "Study results" : "Результаты исследования"}</Link>}
             {showLogin && <Link to="/login" className="nav-sheet-link">{en ? "Sign in" : "Войти"}</Link>}
             <div className="nav-sheet-row">

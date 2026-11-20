@@ -46,9 +46,17 @@ const median = (xs) => {
 
 const pct = (a) => (a ? Math.round((a.score / a.total) * 1000) / 10 : null);
 
-/** Одна строка на участника — «широкий» формат, удобный для SPSS/Excel. */
-export function buildParticipants({ profiles, attempts, events, interactions = [] }) {
-  const participants = profiles.filter(p => p.role === "participant" && p.consent);
+/** Профиль в выбранном пуле: настоящие участники (real) или тестовые аккаунты (test). */
+export const inPool = (p, pool = "real") => p.role === "participant" && !!p.is_test === (pool === "test");
+
+/**
+ * Одна строка на участника — «широкий» формат, удобный для SPSS/Excel.
+ * Тестовые аккаунты (is_test) в статистику не попадают: они видны только в пуле "test"
+ * и получают коды T001…, чтобы их нельзя было спутать с настоящими P001….
+ */
+export function buildParticipants({ profiles, attempts, events, interactions = [] }, { pool = "real" } = {}) {
+  const participants = profiles.filter(p => inPool(p, pool) && p.consent);
+  const prefix = pool === "test" ? "T" : "P";
   return participants.map((p, i) => {
     const mine = attempts.filter(a => a.user_id === p.id);
     const pre  = mine.find(a => a.phase === "pre" && a.test_id === ASSESSMENT_TEST_ID);
@@ -65,7 +73,7 @@ export function buildParticipants({ profiles, attempts, events, interactions = [
     const lastModel = ofType("model_assessment").filter(e => e.payload?.global).at(-1)?.payload?.global;
     const days = new Set([...myEvents, ...inter].map(e => e.created_at.slice(0, 10)));
     return {
-      code: `P${String(i + 1).padStart(3, "0")}`,
+      code: `${prefix}${String(i + 1).padStart(3, "0")}`,
       id: p.id,
       name: p.display_name || "",
       cohort: p.cohort,
@@ -193,4 +201,10 @@ export function buildEventsLong(events, participants) {
   return events
     .filter(e => codeOf[e.user_id])
     .map(e => ({ participant: codeOf[e.user_id], type: e.type, created_at: e.created_at, payload: e.payload }));
+}
+
+/** Пометить аккаунт тестовым или снять пометку (только исследователь, миграция 006). */
+export async function setTestAccount(id, flag) {
+  const { error } = await supabase.rpc("set_test_account", { target: id, flag });
+  if (error) throw error;
 }

@@ -24,6 +24,7 @@ import LoginPage from "./pages/LoginPage";
 import OnboardingPage from "./pages/research/OnboardingPage";
 import AssessmentPage from "./pages/research/AssessmentPage";
 import ResearchDashboard from "./pages/research/ResearchDashboard";
+import ResearchAdmin from "./pages/research/ResearchAdmin";
 import ResearchGate from "./research/ResearchGate";
 import ScrollToTop from "./components/ScrollToTop";
 import { ExperienceProvider, RequireFeature, IfFeature } from "./research/experience";
@@ -63,6 +64,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/research/start" element={<OnboardingPage />} />
             <Route path="/research/dashboard" element={<ResearchDashboard />} />
+            <Route path="/research/admin" element={<ResearchAdmin />} />
             <Route path="/research/:phase" element={<AssessmentPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

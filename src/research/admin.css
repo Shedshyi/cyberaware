@@ -1,0 +1,65 @@
+/* Админ-панель исследователя */
+.ad-banner { margin: 0 0 18px; padding: 12px 16px; border-radius: 12px; background: #fef9c3; color: #854d0e; font-size: 14px; }
+.ad-count { display: inline-block; margin-left: 6px; padding: 1px 9px; border-radius: 999px; background: #f3f4f6; color: #6b7280; font-size: 13px; font-weight: 700; vertical-align: middle; }
+.ad-filters { margin: 4px 0 12px; }
+.ad-filters .rs-input { flex: 1 1 220px; min-width: 0; }
+.ad-filters .rs-select { flex: 0 1 200px; }
+.ad-pill-none { background: #f3f4f6; color: #6b7280; }
+.ad-muted { color: #9ca3af; }
+.ad-row { cursor: pointer; }
+.ad-row:hover td, .ad-row.on td { background: #f8f7ff; }
+.ad-name { max-width: 220px; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.ad-stale { color: #dc2626; font-weight: 600; }
+
+.ad-step { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.ad-step-registered { background: #f3f4f6; color: #6b7280; }
+.ad-step-pre        { background: #ffedd5; color: #9a3412; }
+.ad-step-learning   { background: #e0f2fe; color: #075985; }
+.ad-step-ready      { background: #ede9fe; color: #5b21b6; }
+.ad-step-done       { background: #d1fae5; color: #047857; }
+
+/* Карточка участника — выезжает справа, на телефоне на весь экран */
+.ad-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(15, 23, 42, .35); display: flex; justify-content: flex-end; }
+.ad-card { width: min(560px, 100%); height: 100%; overflow-y: auto; background: #fff; padding: 22px 22px 28px; box-shadow: -12px 0 40px rgba(15, 23, 42, .15); box-sizing: border-box; }
+.ad-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.ad-card-code { font-size: 13px; font-weight: 700; color: #6b7280; }
+.ad-card-name { margin: 2px 0 8px; font-size: 22px; font-weight: 800; overflow-wrap: anywhere; }
+.ad-card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.ad-close { border: none; background: #f3f4f6; color: #374151; width: 36px; height: 36px; border-radius: 10px; font-size: 16px; cursor: pointer; flex-shrink: 0; }
+.ad-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin: 0 0 14px; padding: 14px; border-radius: 14px; background: #f9fafb; }
+.ad-grid div { min-width: 0; }
+.ad-grid dt { font-size: 12px; color: #6b7280; }
+.ad-grid dd { margin: 2px 0 0; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.ad-grid-stats { background: #f5f3ff; }
+.ad-sub { margin: 20px 0 10px; font-size: 16px; }
+.ad-day { margin-bottom: 14px; }
+.ad-day-head { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f3; font-size: 14px; }
+.ad-day-head .ad-muted { font-size: 12px; }
+.ad-day ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.ad-day li { display: flex; gap: 8px; padding: 4px 0; font-size: 14px; line-height: 1.4; }
+.ad-day li.ad-strong { font-weight: 700; }
+.ad-time { color: #9ca3af; font-variant-numeric: tabular-nums; flex-shrink: 0; width: 44px; }
+.ad-card-foot { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f3; }
+
+@media (max-width: 600px) {
+  .ad-card { padding: 16px 16px 24px; }
+  .ad-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Тёмная тема */
+html[data-theme="dark"] .ad-banner { background: #422006; color: #fde68a; }
+html[data-theme="dark"] .ad-count,
+html[data-theme="dark"] .ad-pill-none,
+html[data-theme="dark"] .ad-step-registered { background: #2a2f3d; color: #9ca3af; }
+html[data-theme="dark"] .ad-row:hover td, html[data-theme="dark"] .ad-row.on td { background: #222636; }
+html[data-theme="dark"] .ad-step-pre      { background: #431407; color: #fdba74; }
+html[data-theme="dark"] .ad-step-learning { background: #082f49; color: #7dd3fc; }
+html[data-theme="dark"] .ad-step-ready    { background: #2e1065; color: #c4b5fd; }
+html[data-theme="dark"] .ad-step-done     { background: #052e16; color: #6ee7b7; }
+html[data-theme="dark"] .ad-stale { color: #f87171; }
+html[data-theme="dark"] .ad-card { background: #1a1d27; color: #e2e8f0; }
+html[data-theme="dark"] .ad-close { background: #2a2f3d; color: #e2e8f0; }
+html[data-theme="dark"] .ad-grid { background: #12151f; }
+html[data-theme="dark"] .ad-grid-stats { background: #1e1b3a; }
+html[data-theme="dark"] .ad-grid dt, html[data-theme="dark"] .ad-card-code { color: #9ca3af; }
+html[data-theme="dark"] .ad-day-head, html[data-theme="dark"] .ad-card-foot { border-color: #2a2f3d; }
