@@ -59,12 +59,6 @@ function TestPage() {
   );
   const reveal = pick.attempt >= REVEAL_FROM_ATTEMPT;
 
-  useEffect(() => {
-    if (features.adaptive) {
-      logEvent("adaptation", { trainer: "practice", test: id, level: pick.level, source: pick.source, mix: pick.mix, attempt: pick.attempt });
-    }
-  }, [pick]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const [current,    setCurrent]    = useState(0);
   const [answers,    setAnswers]    = useState({});
   const [submitted,  setSubmitted]  = useState(false);
@@ -109,7 +103,11 @@ function TestPage() {
         responseMs: r.responseMs, hintUsed: r.hintUsed, difficulty: r.difficulty,
       });
     }
-    if (features.adaptive) logModelSnapshot(`practice_test_${id}`);
+    if (features.adaptive) {
+      // Подстройка записывается при сдаче, а не при открытии: брошенные попытки не считаются
+      logEvent("adaptation", { trainer: "practice", test: id, level: pick.level, source: pick.source, mix: pick.mix, attempt: pick.attempt });
+      logModelSnapshot(`practice_test_${id}`);
+    }
     record({ type: "practice_test", topic, score: s, total: questions.length, hints: rows.filter(r => r.hintUsed).length });
   };
 
