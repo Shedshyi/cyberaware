@@ -54,9 +54,13 @@ export const inPool = (p, pool = "real") => p.role === "participant" && !!p.is_t
  * Тестовые аккаунты (is_test) в статистику не попадают: они видны только в пуле "test"
  * и получают коды T001…, чтобы их нельзя было спутать с настоящими P001….
  */
-export function buildParticipants({ profiles, attempts, events, interactions = [] }, { pool = "real" } = {}) {
+export function buildParticipants({ profiles, attempts, events, interactions = [], answers = [] }, { pool = "real" } = {}) {
   const participants = profiles.filter(p => inPool(p, pool) && p.consent);
   const prefix = pool === "test" ? "T" : "P";
+  // Вариант (A/B) каждой попытки входного/итогового теста — по id вопросов в ответах
+  const formById = Object.fromEntries(ASSESSMENT.ru.map(q => [q.id, q.form]));
+  const formOfAttempt = {};
+  for (const a of answers) formOfAttempt[a.attempt_id] ??= formById[a.question_id] ?? null;
   return participants.map((p, i) => {
     const mine = attempts.filter(a => a.user_id === p.id);
     const pre  = mine.find(a => a.phase === "pre" && a.test_id === ASSESSMENT_TEST_ID);
@@ -85,6 +89,9 @@ export function buildParticipants({ profiles, attempts, events, interactions = [
       pre_score: pre?.score ?? null,
       pre_pct: prePct,
       pre_duration_sec: pre?.duration_sec ?? null,
+      form_order: p.form_order ?? null,
+      pre_form: pre ? formOfAttempt[pre.id] ?? null : null,
+      post_form: post ? formOfAttempt[post.id] ?? null : null,
       post_score: post?.score ?? null,
       post_pct: postPct,
       post_duration_sec: post?.duration_sec ?? null,

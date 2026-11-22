@@ -70,3 +70,16 @@ test("точный критерий Фишера", () => {
   near(S.fisherExact([[3, 1], [1, 3]]), 0.4857);
   near(S.fisherExact([[2, 2], [2, 2]]), 1, 1e-9);
 });
+
+test("ANCOVA с ковариатой порядка вариантов и быстрый коэффициент совпадают", () => {
+  const pre = [10, 20, 30, 40, 50, 60, 15, 25, 35, 45, 55, 65];
+  const group = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0];
+  const order = [0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0];
+  const noise = [0.3, -0.2, 0.1, -0.4, 0.2, -0.1, 0.4, -0.3, 0.2, -0.2, 0.1, -0.1];
+  const post = pre.map((x, i) => 5 + 0.7 * x + 10 * group[i] - 6 * order[i] + noise[i]);
+  const a = S.ancova(pre, post, group, [order]);
+  near(a.diff, 10, 0.5);
+  near(a.covars[0].beta, -6, 0.5);
+  near(S.ancovaDiff(pre, post, group, [order]), a.diff, 1e-9);
+  near(S.ancovaDiff(pre, post, group), S.ancova(pre, post, group).diff, 1e-9);
+});

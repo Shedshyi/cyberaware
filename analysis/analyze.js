@@ -5,6 +5,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import * as S from "./stats.js";
+import { ASSESSMENT } from "../src/research/assessmentData.js";
+
+const FORM_OF = Object.fromEntries(ASSESSMENT.ru.map((q) => [q.id, q.form]));
 
 const SEED = 20270601;
 const REPS = 10000;
@@ -144,16 +147,37 @@ export function analyze({ participants, answers = [], alpha = 0.05 }) {
   say();
   const completerCodes = new Set(completers.map((p) => p.code));
   const rel = [];
-  for (const phase of ["pre", "post"]) {
-    const rows = answers.filter((a) => a.phase === phase && completerCodes.has(a.participant));
+  // Надёжность считается по каждому варианту (A, B): строка матрицы — одна попытка (участник × фаза)
+  for (const form of ["A", "B"]) {
+    const rows = answers.filter((a) => (FORM_OF[a.question_id] ?? "A") === form && completerCodes.has(a.participant));
     const qids = [...new Set(rows.map((a) => a.question_id))].sort();
-    const people = [...new Set(rows.map((a) => a.participant))];
-    const matrix = people.map((p) => qids.map((q) => rows.find((a) => a.participant === p && a.question_id === q)?.correct ?? null))
+    const sittings = [...new Set(rows.map((a) => `${a.participant}|${a.phase}`))];
+    const matrix = sittings.map((k) => qids.map((q) => rows.find((a) => `${a.participant}|${a.phase}` === k && a.question_id === q)?.correct ?? null))
       .filter((r) => r.every((x) => x != null));
-    rel.push([phase === "pre" ? "Входной" : "Итоговый", matrix.length, qids.length, matrix.length >= 3 ? f(S.kr20(matrix), 2) : "—"]);
+    if (qids.length) rel.push([`Вариант ${form}`, matrix.length, qids.length, matrix.length >= 3 ? f(S.kr20(matrix), 2) : "—"]);
   }
-  say(table(["Тест", "Участников", "Вопросов", "KR-20"], rel));
+  say(table(["Тест", "Прохождений", "Вопросов", "KR-20"], rel));
   say();
+  say("Прохождение — один участник на одной фазе: вариант A пишут и на входе (порядок A→B), и на выходе (B→A).");
+  say();
+
+  // 4a. Варианты теста
+  const hasForms = completers.some((p) => p.pre_form);
+  if (hasForms) {
+    say("### Варианты теста и их сложность");
+    say();
+    say(table(["Порядок", ...GROUPS.map(([, n]) => n)], ["AB", "BA"].map((o) => [o === "AB" ? "A → B" : "B → A",
+      ...GROUPS.map(([g]) => by(completers, g).filter((p) => `${p.pre_form}${p.post_form}` === o).length)])));
+    say();
+    const formMean = (form) => [
+      msd(col(completers.filter((p) => p.pre_form === form), "pre_pct")),
+      msd(col(completers.filter((p) => p.post_form === form), "post_pct")),
+    ];
+    say(table(["Вариант", "На входе: M (SD)", "На выходе: M (SD)"], [["A", ...formMean("A")], ["B", ...formMean("B")]]));
+    say();
+    say("Если один вариант заметно легче, это видно по обоим столбцам; контрбалансировка и ковариата порядка в разделе 6 убирают его влияние на сравнение групп.");
+    say();
+  }
 
   // 5. Изменение внутри групп
   say("## 5. Изменение от входного к итоговому внутри групп");
@@ -170,14 +194,18 @@ export function analyze({ participants, answers = [], alpha = 0.05 }) {
   say();
 
   // 6. Основной анализ
-  say("## 6. Основная гипотеза: ANCOVA (итоговый балл ~ группа + входной балл)");
+  const allC = [...E, ...C];
+  const orderCol = allC.map((p) => (p.pre_form === "B" ? 1 : 0));
+  const useOrder = allC.some((p) => p.pre_form === "A") && allC.some((p) => p.pre_form === "B");
+  say(`## 6. Основная гипотеза: ANCOVA (итоговый балл ~ группа + входной балл${useOrder ? " + порядок вариантов" : ""})`);
   say();
   const result = { completers: completers.length, nE: E.length, nC: C.length };
   if (enough) {
-    const all = [...E, ...C];
+    const all = allC;
     const pre = all.map((p) => p.pre_pct), post = all.map((p) => p.post_pct), grp = all.map((p) => (p.cohort === "experimental" ? 1 : 0));
-    const a = S.ancova(pre, post, grp);
-    const permP = S.permutationP(grp, (lab) => S.ancovaDiff(pre, post, lab), { reps: REPS, seed: SEED });
+    const covars = useOrder ? [orderCol] : [];
+    const a = S.ancova(pre, post, grp, covars);
+    const permP = S.permutationP(grp, (lab) => S.ancovaDiff(pre, post, lab, covars), { reps: REPS, seed: SEED });
     Object.assign(result, { ancova: a, permP });
     say(table(["Показатель", "Значение"], [
       ["Скорректированная разница Э − К, п.п.", `${f(a.diff)} ${ci(a.ci)}`],
@@ -187,6 +215,7 @@ export function analyze({ participants, answers = [], alpha = 0.05 }) {
       ["Частная η²", f(a.partialEta2, 3)],
       ["Наклон по входному баллу", f(a.slope, 2)],
       ["Однородность наклонов (p взаимодействия)", pv(a.slopesP)],
+      ...(useOrder ? [["Порядок B→A против A→B, п.п.", `${f(a.covars[0].beta)} ${ci(a.covars[0].ci)}, p = ${pv(a.covars[0].p)}`]] : []),
     ]));
     say();
     const sig = a.p < alpha && permP < alpha;

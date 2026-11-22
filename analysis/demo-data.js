@@ -7,10 +7,10 @@ import path from "node:path";
 import { ASSESSMENT } from "../src/research/assessmentData.js";
 import { rng } from "./stats.js";
 
-export function makeDemo({ nPerGroup = 10, effect = 12, dropouts = 1, seed = 7 } = {}) {
+export function makeDemo({ nPerGroup = 10, effect = 12, dropouts = 1, seed = 7, formBEasier = 6 } = {}) {
   const rand = rng(seed);
   const normal = () => Math.sqrt(-2 * Math.log(rand() + 1e-12)) * Math.cos(2 * Math.PI * rand());
-  const qs = ASSESSMENT.ru;
+  const formQs = { A: ASSESSMENT.ru.filter(q => q.form === "A"), B: ASSESSMENT.ru.filter(q => q.form === "B") };
   const participants = [], answers = [];
   const total = 2 * (nPerGroup + dropouts);
   for (let i = 0; i < total; i++) {
@@ -19,7 +19,12 @@ export function makeDemo({ nPerGroup = 10, effect = 12, dropouts = 1, seed = 7 }
     const ability = 50 + 15 * normal();
     const gain = 10 + (cohort === "experimental" ? effect : 0) + 8 * normal();
     const dropped = i >= 2 * nPerGroup;
+    // Контрбалансировка: внутри каждой группы порядок вариантов чередуется
+    const formOrder = Math.floor(i / 2) % 2 ? "BA" : "AB";
     const take = (phase, level) => {
+      const form = phase === "pre" ? formOrder[0] : formOrder[1];
+      const qs = formQs[form];
+      level += form === "B" ? formBEasier : 0;
       let score = 0;
       for (const q of qs) {
         const p = Math.min(0.97, Math.max(0.03, level / 100 + 0.15 * (rand() - 0.5)));
@@ -32,8 +37,9 @@ export function makeDemo({ nPerGroup = 10, effect = 12, dropouts = 1, seed = 7 }
     const pre = take("pre", ability);
     const post = dropped ? null : take("post", ability + gain);
     const exp = cohort === "experimental";
+    const qs = formQs.A;
     participants.push({
-      code, cohort, age: 18 + Math.floor(rand() * 8), occupation: "student", study_group: "",
+      code, cohort, form_order: formOrder, pre_form: formOrder[0], post_form: dropped ? null : formOrder[1], age: 18 + Math.floor(rand() * 8), occupation: "student", study_group: "",
       prior_training: rand() < 0.3, self_rating: 1 + Math.floor(rand() * 5),
       pre_score: pre, pre_pct: (pre / qs.length) * 100, post_score: post, post_pct: post == null ? null : (post / qs.length) * 100,
       gain_pct: post == null ? null : ((post - pre) / qs.length) * 100,

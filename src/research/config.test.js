@@ -17,3 +17,15 @@ test("тестовым аккаунтам пауза не нужна; без в�
   assert.equal(postGate({ research: pre, practiceDone: 5, isTest: true, now: t0 + 60e3 }).unlocked, true);
   assert.equal(postGate({ research: { pre: null }, practiceDone: 9, isTest: true }).unlocked, false);
 });
+
+import { formFor, fallbackFormOrder, getAssessment } from "./assessmentData.js";
+
+test("варианты теста: на входе и выходе разные", () => {
+  assert.deepEqual([formFor("AB", "pre"), formFor("AB", "post")], ["A", "B"]);
+  assert.deepEqual([formFor("BA", "pre"), formFor("BA", "post")], ["B", "A"]);
+  assert.deepEqual([formFor(null, "pre"), formFor(null, "post")], ["A", "B"]);
+  assert.ok(["AB", "BA"].includes(fallbackFormOrder("e3b0c442-98fc")));
+  const a = getAssessment("ru", "A").map(q => q.id), b = getAssessment("ru", "B").map(q => q.id);
+  assert.equal(a.length, 15);
+  assert.equal(a.filter(id => b.includes(id)).length, 0, "варианты не пересекаются");
+});

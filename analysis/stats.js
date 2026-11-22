@@ -208,16 +208,22 @@ function solve(A, y) {
   return M.map((row) => row.slice(n));
 }
 
-/** МНК: X — массив строк предикторов (без свободного члена), y — отклик. */
-export function ols(X, y) {
-  const Z = X.map((row) => [1, ...row]);
-  const n = Z.length, p = Z[0].length;
+/** МНК без статистических выводов: коэффициенты, остатки, (XᵀX)⁻¹. Z уже со столбцом единиц. */
+function lsq(Z, y) {
+  const p = Z[0].length;
   const XtX = Array.from({ length: p }, (_, i) => Array.from({ length: p }, (_, j) => Z.reduce((s, r) => s + r[i] * r[j], 0)));
   const inv = solve(XtX);
   const Xty = Array.from({ length: p }, (_, i) => Z.reduce((s, r, k) => s + r[i] * y[k], 0));
   const beta = inv.map((row) => row.reduce((s, v, j) => s + v * Xty[j], 0));
   const resid = Z.map((r, k) => y[k] - r.reduce((s, v, j) => s + v * beta[j], 0));
-  const sse = resid.reduce((s, e) => s + e * e, 0);
+  return { beta, inv, resid, sse: resid.reduce((s, e) => s + e * e, 0) };
+}
+
+/** МНК: X — массив строк предикторов (без свободного члена), y — отклик. */
+export function ols(X, y) {
+  const Z = X.map((row) => [1, ...row]);
+  const n = Z.length, p = Z[0].length;
+  const { beta, inv, sse } = lsq(Z, y);
   const df = n - p;
   const sigma2 = sse / df;
   const se = inv.map((row, i) => Math.sqrt(sigma2 * row[i]));
@@ -231,19 +237,22 @@ export function ols(X, y) {
 }
 
 /**
- * ANCOVA: post ~ group + pre. group — 1 для экспериментальной, 0 для контрольной.
- * Возвращает скорректированную разницу групп, её ДИ и p, частную η² и проверку
- * однородности наклонов (взаимодействие group × pre).
+ * ANCOVA: post ~ group + pre (+ дополнительные ковариаты, например порядок вариантов теста).
+ * group — 1 для экспериментальной, 0 для контрольной; covars — массив столбцов.
+ * Возвращает скорректированную разницу групп, её ДИ и p, частную η², коэффициенты
+ * ковариат и проверку однородности наклонов (взаимодействие group × pre).
  */
-export function ancova(pre, post, group) {
-  const main = ols(pre.map((x, i) => [group[i], x]), post);
-  const reduced = ols(pre.map((x) => [x]), post);
+export function ancova(pre, post, group, covars = []) {
+  const extra = (i) => covars.map((c) => c[i]);
+  const main = ols(pre.map((x, i) => [group[i], x, ...extra(i)]), post);
+  const reduced = ols(pre.map((x, i) => [x, ...extra(i)]), post);
   const partialEta2 = (reduced.sse - main.sse) / reduced.sse;
   const preC = pre.map((x) => x - mean(pre));
-  const inter = ols(preC.map((x, i) => [group[i], x, group[i] * x]), post);
+  const inter = ols(preC.map((x, i) => [group[i], x, group[i] * x, ...extra(i)]), post);
   return {
     diff: main.beta[1], se: main.se[1], t: main.t[1], df: main.df, p: main.p[1], ci: main.ci[1],
     slope: main.beta[2], partialEta2,
+    covars: covars.map((_, k) => ({ beta: main.beta[3 + k], ci: main.ci[3 + k], p: main.p[3 + k] })),
     slopesP: inter.p[3],
   };
 }
@@ -348,14 +357,12 @@ export function fisherExact([[a, b], [c, d]]) {
   return Math.min(1, p);
 }
 
-/** Только коэффициент группы в post ~ group + pre (теорема Фриша–Во) — быстро, для перестановок. */
-export function ancovaDiff(pre, post, group) {
-  const mp = mean(pre), vp = pre.reduce((s, x) => s + (x - mp) ** 2, 0);
-  const resid = (ys) => {
-    const my = mean(ys);
-    const b = pre.reduce((s, x, i) => s + (x - mp) * (ys[i] - my), 0) / vp;
-    return ys.map((y, i) => y - my - b * (pre[i] - mp));
-  };
-  const eg = resid(group), ey = resid(post);
+/**
+ * Только коэффициент группы в post ~ group + pre (+ ковариаты) по теореме Фриша–Во —
+ * быстро, для перестановок: группа и отклик очищаются от ковариат, затем регрессия остатков.
+ */
+export function ancovaDiff(pre, post, group, covars = []) {
+  const Z = pre.map((x, i) => [1, x, ...covars.map((c) => c[i])]);
+  const eg = lsq(Z, group).resid, ey = lsq(Z, post).resid;
   return eg.reduce((s, x, i) => s + x * ey[i], 0) / eg.reduce((s, x) => s + x * x, 0);
 }

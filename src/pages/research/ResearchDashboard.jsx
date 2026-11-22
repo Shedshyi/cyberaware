@@ -28,6 +28,7 @@ const ENGAGEMENT = [
 // Колонки CSV участников: без имени и uuid — только псевдонимизированный код.
 const PARTICIPANT_COLUMNS = [
   "code", "cohort", "age", "occupation", "study_group", "prior_training", "self_rating",
+  "form_order", "pre_form", "post_form",
   "pre_score", "pre_pct", "pre_duration_sec", "post_score", "post_pct", "post_duration_sec", "gain_pct",
   "practice_tests_done", "practice_attempts", "practice_avg_pct", "lessons_opened", "games_played",
   "days_pre_to_post", "active_days", "interactions_n", "interactions_correct_pct", "hints_used",

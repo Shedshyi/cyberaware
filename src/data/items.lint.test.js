@@ -74,9 +74,18 @@ test("в каждой теме практики есть все уровни с�
   }
 });
 
-test("входной тест: 2 вопроса на тему, id не пересекаются с версией 1", () => {
-  const byTopic = {};
-  for (const q of ASSESSMENT.ru) byTopic[q.topic] = (byTopic[q.topic] || 0) + 1;
-  assert.deepEqual(Object.values(byTopic), Array(10).fill(2));
+test("входной/итоговый: два параллельных варианта по 15, одинаковые по темам", () => {
+  const forms = { A: ASSESSMENT.ru.filter(q => q.form === "A"), B: ASSESSMENT.ru.filter(q => q.form === "B") };
+  assert.equal(forms.A.length + forms.B.length, ASSESSMENT.ru.length, "у каждого вопроса есть вариант");
+  const topics = (qs) => qs.reduce((m, q) => ({ ...m, [q.topic]: (m[q.topic] || 0) + 1 }), {});
+  for (const f of ["A", "B"]) {
+    assert.equal(forms[f].length, 15, `вариант ${f}`);
+    assert.equal(Object.keys(topics(forms[f])).length, 10, `вариант ${f}: все 10 тем`);
+    const pos = [0, 0, 0, 0];
+    for (const q of forms[f]) pos[q.correct]++;
+    for (const n of pos) assert.ok(n >= 2 && n <= 6, `вариант ${f}: позиции ${pos.join("/")}`);
+  }
+  assert.deepEqual(topics(forms.A), topics(forms.B), "темы в вариантах совпадают");
   assert.ok(ASSESSMENT.ru.every(q => q.id > 200), "новые id начинаются с 201");
+  ASSESSMENT.ru.forEach((q, i) => assert.equal(ASSESSMENT.en[i].form, q.form, `вариант вопроса ${q.id} в EN`));
 });

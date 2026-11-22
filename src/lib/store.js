@@ -233,10 +233,13 @@ export async function hydrateFromServer(userId) {
   warn("hydrate/lessons", lessonsRes.error);
 
   const remote = profileRes.data;
+  let preForm = null;
 
   if (preRes.data?.length) {
     const { ASSESSMENT } = await import("../research/assessmentData.js");
     const topicOf = Object.fromEntries(ASSESSMENT.ru.map(q => [q.id, q.topic]));
+    // Какой вариант (A/B) человек реально писал на входе — по id вопросов
+    preForm = ASSESSMENT.ru.find(q => q.id === preRes.data[0].question_id)?.form ?? null;
     const map = {};
     for (const a of preRes.data) {
       const t = topicOf[a.question_id];
@@ -268,6 +271,7 @@ export async function hydrateFromServer(userId) {
     }
     writeJSON(KEYS.results, results);
   }
+  if (research.pre && preForm) research.pre.form = preForm;
 
   if (lessonsRes.data) {
     const read = {};

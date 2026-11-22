@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../auth/AuthContext";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { getTestResults, savePreTopics, saveTestResult } from "../../lib/store";
-import { ASSESSMENT_TEST_ID, getAssessment } from "../../research/assessmentData";
+import { ASSESSMENT_TEST_ID, getAssessment, formFor, fallbackFormOrder } from "../../research/assessmentData";
 import { postGate } from "../../research/config";
 import "../../research/research.css";
 
@@ -16,7 +16,13 @@ export default function AssessmentPage() {
   const { lang } = useLanguage();
   const en = lang === "en";
 
-  const questions = useMemo(() => getAssessment(lang), [lang]);
+  // Вариант A или B: на входе и на выходе разные (контрбалансировка, profiles.form_order)
+  // Итоговый — всегда вариант, противоположный реально написанному на входе.
+  const preForm = research?.pre?.form;
+  const form = phase === "post" && preForm
+    ? (preForm === "A" ? "B" : "A")
+    : formFor(profile?.form_order ?? fallbackFormOrder(user?.id), phase);
+  const questions = useMemo(() => getAssessment(lang, form), [lang, form]);
   const [started, setStarted]   = useState(false);
   const [current, setCurrent]   = useState(0);
   const [answers, setAnswers]   = useState({});   // questionId -> индекс показанного варианта
@@ -166,7 +172,7 @@ export default function AssessmentPage() {
       });
       savePreTopics(map);
     }
-    markAssessmentDone(phase, { score, total: questions.length, date: new Date().toISOString() });
+    markAssessmentDone(phase, { score, total: questions.length, date: new Date().toISOString(), form });
   };
 
   return (

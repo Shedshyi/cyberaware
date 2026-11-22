@@ -247,6 +247,8 @@ function ParticipantCard({ row, data, en, busy, onClose, onToggleTest }) {
     [en ? "Self-rating" : "Самооценка", p.self_rating ? `${p.self_rating}/5` : "—"],
     [en ? "Registered" : "Регистрация", date(p.created_at, en)],
     [en ? "Group assigned" : "Группа назначена", date(p.cohort_assigned_at, en)],
+    [en ? "Test forms (entry → final)" : "Варианты теста (вход → итог)",
+      p.form_order ? `${p.form_order[0]} → ${p.form_order[1]}${m?.pre_form && m.pre_form !== p.form_order[0] ? (en ? ` (actual entry: ${m.pre_form})` : ` (на входе писал ${m.pre_form})`) : ""}` : "—"],
     [en ? "Last active" : "Последняя активность", date(row.lastSeen, en)],
   ];
   const stats = m ? [
